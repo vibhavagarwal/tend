@@ -28,6 +28,8 @@ import {
   validateEntryProposal,
 } from "./src/domain/tend";
 import { interpretHabitStatement } from "./src/domain/interpreter";
+import { nextAcknowledgment } from "./src/domain/acknowledgment";
+import { currentWeekRange, reflectionCounts } from "./src/domain/reflection";
 import {
   emptyTendData,
   Habit,
@@ -84,6 +86,9 @@ function TendApp() {
   const [reviewingPendingId, setReviewingPendingId] = useState<string | null>(null);
   const [recoveryText, setRecoveryText] = useState("");
   const [reduceMotion, setReduceMotion] = useState(false);
+  const [screen, setScreen] = useState<"track" | "reflect">("track");
+  const [acknowledgment, setAcknowledgment] = useState<string | null>(null);
+  const [creationSendOff, setCreationSendOff] = useState<string | null>(null);
   const saveChain = useRef(Promise.resolve());
 
   const persist = useCallback((next: TendData) => {
@@ -254,6 +259,7 @@ function TendApp() {
   const confirmReview = () => {
     if (proposal?.type === "createHabit") {
       if (commitData((current) => removeReviewedPending(createHabit(current, proposal.name)))) {
+        setCreationSendOff(`You're now tracking ${proposal.name}. Good luck—and, most importantly, have fun.`);
         setReviewingPendingId(null);
         resetComposer();
       }
@@ -277,14 +283,20 @@ function TendApp() {
       }
       if (commitData((current) => {
         const restored = restoreHabit(current, archived.id);
-        return removeReviewedPending(saveHabitEntry(restored, validatedEntry));
+        const next = nextAcknowledgment(removeReviewedPending(saveHabitEntry(restored, validatedEntry)));
+        setAcknowledgment(next.message);
+        return next.data;
       })) {
         setReviewingPendingId(null);
         resetComposer();
       }
       return;
     }
-    if (commitData((current) => removeReviewedPending(saveHabitEntry(current, validatedEntry)))) {
+    if (commitData((current) => {
+      const next = nextAcknowledgment(removeReviewedPending(saveHabitEntry(current, validatedEntry)));
+      setAcknowledgment(next.message);
+      return next.data;
+    })) {
       setReviewingPendingId(null);
       resetComposer();
     }
@@ -301,6 +313,14 @@ function TendApp() {
       quantityUnit: proposal.quantityUnit,
     };
     applyProposal(selected, data);
+  };
+
+  const updateEntryReview = (entry: Omit<ValidatedHabitEntry, "habitId">) => {
+    const next: InterpretationProposal = {
+      type: "logHabitEntry", habitName: entry.habitName, durationMinutes: entry.durationMinutes,
+      activityDate: entry.activityDate, quantityAmount: entry.quantityAmount, quantityUnit: entry.quantityUnit,
+    };
+    applyProposal(next, data);
   };
 
   const discardReviewedPending = () => {
@@ -343,6 +363,10 @@ function TendApp() {
     );
   }
 
+  if (screen === "reflect") {
+    return <ReflectScreen colors={colors} data={data} onBack={() => setScreen("track")} />;
+  }
+
   return (
     <SafeAreaView edges={["top", "right", "bottom", "left"]} style={[styles.safe, { backgroundColor: colors.background }]}>
       <StatusBar style={colors.dark ? "light" : "dark"} />
@@ -355,10 +379,9 @@ function TendApp() {
           <View style={styles.header}>
             <TendMark />
             <Pressable
-              accessibilityHint="Reflection is not part of the current Tend baseline"
+              accessibilityHint="Open your saved activity reflection"
               accessibilityRole="button"
-              accessibilityState={{ disabled: true }}
-              disabled
+              onPress={() => setScreen("reflect")}
               style={[styles.reflect, { borderColor: colors.hairline }]}
             >
               <Text style={[type.tertiary, { color: colors.mutedText }]}>Reflect</Text>
@@ -387,6 +410,7 @@ function TendApp() {
                 onConfirm={confirmReview}
                 onChooseHabit={chooseHabit}
                 onEdit={editStatement}
+                onUpdateEntry={updateEntryReview}
                 onCancel={cancelReview}
               />
             ) : typing ? (
@@ -414,6 +438,9 @@ function TendApp() {
           </View>
 
           {message ? <Text accessibilityLiveRegion="polite" style={[type.body, styles.message, { color: colors.error }]}>{message}</Text> : null}
+
+          {acknowledgment ? <Acknowledgment colors={colors} message={acknowledgment} /> : null}
+          {creationSendOff ? <Text accessibilityLiveRegion="polite" style={[type.title, styles.center, { color: colors.primaryText }]}>{creationSendOff}</Text> : null}
 
           {needsRetryCount > 0 ? (
             <TextBlock colors={colors} style={{ color: colors.mutedText }}>
@@ -564,7 +591,7 @@ function TypedComposer({ colors, statement, setStatement, onSubmit, onSpeak, isI
   );
 }
 
-function ReviewComposer({ colors, statement, proposal, validatedEntry, duplicate, onConfirm, onChooseHabit, onEdit, onCancel }: ColorProps & {
+function ReviewComposer({ colors, statement, proposal, validatedEntry, duplicate, onConfirm, onChooseHabit, onEdit, onUpdateEntry, onCancel }: ColorProps & {
   statement: string;
   proposal: InterpretationProposal | null;
   validatedEntry: ValidatedHabitEntry | null;
@@ -572,8 +599,22 @@ function ReviewComposer({ colors, statement, proposal, validatedEntry, duplicate
   onConfirm: () => void;
   onChooseHabit: (name: string) => void;
   onEdit: () => void;
+  onUpdateEntry: (entry: Omit<ValidatedHabitEntry, "habitId">) => void;
   onCancel: () => void;
 }) {
+  const sourceDatePhrase = proposal && "sourceDatePhrase" in proposal ? proposal.sourceDatePhrase : undefined;
+  const [editingEntry, setEditingEntry] = useState(false);
+  const [habitName, setHabitName] = useState(validatedEntry?.habitName ?? "");
+  const [date, setDate] = useState(validatedEntry?.activityDate ?? "");
+  const [duration, setDuration] = useState(validatedEntry?.durationMinutes?.toString() ?? "");
+  const [quantity, setQuantity] = useState(validatedEntry?.quantityAmount?.toString() ?? "");
+  const [unit, setUnit] = useState(validatedEntry?.quantityUnit ?? "");
+  const applyEdits = () => {
+    const durationMinutes = duration.trim() ? Number(duration) : null;
+    const quantityAmount = quantity.trim() ? Number(quantity) : null;
+    onUpdateEntry({ habitName: habitName.trim(), activityDate: date.trim(), durationMinutes, quantityAmount, quantityUnit: quantityAmount === null ? null : unit.trim() || null });
+    setEditingEntry(false);
+  };
   return (
     <View style={styles.composer}>
       <SectionLabel colors={colors}>You said</SectionLabel>
@@ -617,6 +658,7 @@ function ReviewComposer({ colors, statement, proposal, validatedEntry, duplicate
           {validatedEntry.durationMinutes !== null ? <TextBlock colors={colors}>Duration: {validatedEntry.durationMinutes} minutes</TextBlock> : null}
           {validatedEntry.quantityAmount !== null ? <TextBlock colors={colors}>Quantity: {displayQuantity(validatedEntry.quantityAmount)} {validatedEntry.quantityUnit}</TextBlock> : null}
           <TextBlock colors={colors}>Activity Date: {formatDate(validatedEntry.activityDate)}</TextBlock>
+          {sourceDatePhrase ? <Text style={[type.metadata, { color: colors.mutedText }]}>Recognized date: “{sourceDatePhrase}”</Text> : null}
           <Action colors={colors} onPress={onConfirm}>{duplicate ? "Restore and save anyway" : "Restore and save"}</Action>
         </>
       ) : null}
@@ -628,8 +670,17 @@ function ReviewComposer({ colors, statement, proposal, validatedEntry, duplicate
           {validatedEntry.durationMinutes !== null ? <TextBlock colors={colors}>Duration: {validatedEntry.durationMinutes} minutes</TextBlock> : null}
           {validatedEntry.quantityAmount !== null ? <TextBlock colors={colors}>Quantity: {displayQuantity(validatedEntry.quantityAmount)} {validatedEntry.quantityUnit}</TextBlock> : null}
           <TextBlock colors={colors}>Activity Date: {formatDate(validatedEntry.activityDate)}</TextBlock>
+          {sourceDatePhrase ? <Text style={[type.metadata, { color: colors.mutedText }]}>Recognized date: “{sourceDatePhrase}”</Text> : null}
           <TextBlock colors={colors}>Review this interpretation before saving.</TextBlock>
           <Action colors={colors} onPress={onConfirm}>{duplicate ? "Save anyway" : "Save Habit Entry"}</Action>
+          {!editingEntry ? <Action colors={colors} variant="tertiary" onPress={() => setEditingEntry(true)}>Edit entry details</Action> : <View style={styles.editFields}>
+            <TextInput accessibilityLabel="Habit name" value={habitName} onChangeText={setHabitName} style={[styles.fieldInput, type.field, { color: colors.primaryText, borderBottomColor: colors.quietAccent }]} />
+            <TextInput accessibilityLabel="Activity Date in YYYY-MM-DD" value={date} onChangeText={setDate} style={[styles.fieldInput, type.field, { color: colors.primaryText, borderBottomColor: colors.quietAccent }]} />
+            <TextInput accessibilityLabel="Duration in minutes, optional" value={duration} onChangeText={setDuration} keyboardType="numeric" style={[styles.fieldInput, type.field, { color: colors.primaryText, borderBottomColor: colors.quietAccent }]} />
+            <TextInput accessibilityLabel="Quantity, optional" value={quantity} onChangeText={setQuantity} keyboardType="numeric" style={[styles.fieldInput, type.field, { color: colors.primaryText, borderBottomColor: colors.quietAccent }]} />
+            {quantity.trim() ? <TextInput accessibilityLabel="Quantity unit" value={unit} onChangeText={setUnit} style={[styles.fieldInput, type.field, { color: colors.primaryText, borderBottomColor: colors.quietAccent }]} /> : null}
+            <Action colors={colors} variant="secondary" onPress={applyEdits}>Apply corrections</Action>
+          </View>}
         </>
       ) : null}
       <View style={styles.actionRow}>
@@ -638,6 +689,49 @@ function ReviewComposer({ colors, statement, proposal, validatedEntry, duplicate
       </View>
     </View>
   );
+}
+
+function Acknowledgment({ colors, message }: ColorProps & { message: string }) {
+  return (
+    <View accessibilityLiveRegion="polite" style={[styles.acknowledgment, { backgroundColor: colors.dark ? "#172927" : "#D9E7E1", borderColor: colors.emphasis }]}>
+      <Text style={[type.transcript, styles.center, { color: colors.primaryText }]}>{message}</Text>
+    </View>
+  );
+}
+
+function ReflectScreen({ colors, data, onBack }: ColorProps & { data: TendData; onBack: () => void }) {
+  const range = currentWeekRange();
+  const weekly = reflectionCounts(data, range);
+  const total = reflectionCounts(data);
+  const rangeLabel = `${formatDate(range.start)} – ${formatDate(range.end)}`;
+  return (
+    <SafeAreaView edges={["top", "right", "bottom", "left"]} style={[styles.safe, { backgroundColor: colors.background }]}>
+      <StatusBar style={colors.dark ? "light" : "dark"} />
+      <ScrollView contentContainerStyle={styles.content} accessibilityLabel="Tend Reflect">
+        <View style={styles.header}>
+          <Action colors={colors} variant="secondary" onPress={onBack}>Back</Action>
+          <Text style={[type.heading, { color: colors.primaryText }]}>Reflect</Text>
+        </View>
+        {total.length === 0 ? <Text style={[type.prompt, styles.center, { color: colors.primaryText }]}>No activity saved yet. When you save an activity, it will appear here.</Text> : <>
+          <View style={styles.section}>
+            <SectionLabel colors={colors}>This week</SectionLabel>
+            <Text style={[type.metadata, styles.center, { color: colors.mutedText }]}>{rangeLabel}</Text>
+            {weekly.length === 0 ? <TextBlock colors={colors} style={styles.center}>No activity was saved this week.</TextBlock> : <ReflectionCounts colors={colors} items={weekly} />}
+          </View>
+          <Rule colors={colors} />
+          <View style={styles.section}>
+            <SectionLabel colors={colors}>In total</SectionLabel>
+            <ReflectionCounts colors={colors} items={total} />
+          </View>
+        </>}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+function ReflectionCounts({ colors, items }: ColorProps & { items: ReturnType<typeof reflectionCounts> }) {
+  if (items.length <= 3) return <Text style={[type.title, styles.center, { color: colors.primaryText }]}>{items.map(({ habit, count }) => `${habit.name}${habit.archivedAt !== null ? " (archived)" : ""} — ${count} ${count === 1 ? "time" : "times"}`).join("; ")}</Text>;
+  return <View style={styles.section}>{items.map(({ habit, count }) => <Text key={habit.id} style={[type.list, { color: colors.primaryText }]}>{habit.name}{habit.archivedAt !== null ? " (archived)" : ""} — {count} {count === 1 ? "time" : "times"}</Text>)}</View>;
 }
 
 function History({ colors, data, onDelete }: ColorProps & { data: TendData; onDelete: (entry: HabitEntry) => void }) {
@@ -708,10 +802,13 @@ const styles = StyleSheet.create({
   composer: { width: "100%", gap: spacing.sm },
   center: { textAlign: "center" },
   input: { minHeight: 92, maxHeight: 190, borderBottomWidth: 1, textAlignVertical: "top", paddingHorizontal: 4, paddingVertical: 12 },
+  fieldInput: { minHeight: 44, borderBottomWidth: 1, paddingHorizontal: 4, paddingVertical: 8 },
+  editFields: { width: "100%", gap: spacing.xs },
   message: { width: "100%", textAlign: "center" },
   levels: { height: 40, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
   level: { width: 3, borderRadius: 2 },
   actionRow: { flexDirection: "row", gap: spacing.xs },
+  acknowledgment: { width: "100%", borderTopWidth: 1, paddingVertical: spacing.md, paddingHorizontal: spacing.sm },
   section: { width: "100%", gap: spacing.sm },
   row: { width: "100%", minHeight: 52, flexDirection: "row", alignItems: "center", gap: spacing.sm },
 });

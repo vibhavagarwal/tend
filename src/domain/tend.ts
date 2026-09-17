@@ -77,6 +77,9 @@ export function validateEntryProposal(data: TendData, proposal: Extract<Interpre
   if (proposal.durationMinutes !== null && proposal.durationMinutes <= 0) {
     throw new Error("Habit Entry duration must be positive when supplied.");
   }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(proposal.activityDate) || Number.isNaN(Date.parse(`${proposal.activityDate}T12:00:00`))) {
+    throw new Error("Habit Entry Activity Date must be a valid date.");
+  }
   if ((proposal.quantityAmount === null) !== (proposal.quantityUnit === null)) {
     throw new Error("Habit Entry quantity and unit must be supplied together.");
   }

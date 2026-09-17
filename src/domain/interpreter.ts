@@ -104,6 +104,7 @@ export function parseGatewayProposal(value: unknown, activeHabitNames: string[])
         habitName,
         durationMinutes: optionalDuration(json.duration_minutes),
         activityDate: requiredDate(json.activity_date),
+        sourceDatePhrase: optionalSourceDatePhrase(json.source_date_phrase),
         quantityAmount: quantity.amount,
         quantityUnit: quantity.unit,
       };
@@ -120,6 +121,7 @@ export function parseGatewayProposal(value: unknown, activeHabitNames: string[])
         candidateHabitNames: candidates,
         durationMinutes: optionalDuration(json.duration_minutes),
         activityDate: requiredDate(json.activity_date),
+        sourceDatePhrase: optionalSourceDatePhrase(json.source_date_phrase),
         quantityAmount: quantity.amount,
         quantityUnit: quantity.unit,
       };
@@ -163,4 +165,10 @@ function requiredDate(value: unknown): string {
     throw new Error("The interpretation did not identify a valid Activity Date.");
   }
   return value;
+}
+
+function optionalSourceDatePhrase(value: unknown): string | undefined {
+  if (value == null) return undefined;
+  if (typeof value !== "string" || !value.trim()) throw new Error("The interpretation returned an invalid date phrase.");
+  return value.trim();
 }

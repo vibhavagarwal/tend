@@ -71,4 +71,12 @@ describe("Tend domain and Entry Safety", () => {
       quantityUnit: null,
     })).toThrow("No matching Active Habit");
   });
+
+  it("rejects invalid corrections before a Habit Entry can be saved", () => {
+    const data = createHabit(emptyTendData(), "Meditation", services);
+    expect(() => validateEntryProposal(data, {
+      type: "logHabitEntry", habitName: "Meditation", durationMinutes: null,
+      activityDate: "not-a-date", quantityAmount: null, quantityUnit: null,
+    })).toThrow("valid date");
+  });
 });

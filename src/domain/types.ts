@@ -24,6 +24,7 @@ export type InterpretationProposal =
       habitName: string;
       durationMinutes: number | null;
       activityDate: string;
+      sourceDatePhrase?: string | undefined;
       quantityAmount: number | null;
       quantityUnit: string | null;
     }
@@ -32,6 +33,7 @@ export type InterpretationProposal =
       candidateHabitNames: string[];
       durationMinutes: number | null;
       activityDate: string;
+      sourceDatePhrase?: string | undefined;
       quantityAmount: number | null;
       quantityUnit: string | null;
     }
@@ -40,6 +42,7 @@ export type InterpretationProposal =
       habitName: string;
       durationMinutes: number | null;
       activityDate: string;
+      sourceDatePhrase?: string | undefined;
       quantityAmount: number | null;
       quantityUnit: string | null;
     }
@@ -70,6 +73,7 @@ export interface TendData {
   habits: Habit[];
   entries: HabitEntry[];
   pendingStatements: PendingStatement[];
+  acknowledgmentCursor?: number;
 }
 
 export const emptyTendData = (): TendData => ({

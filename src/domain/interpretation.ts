@@ -67,7 +67,7 @@ export function interpretStatement(
       matchingHabitNames(quantity[1]!, activeHabitNames),
       matchingHabitNames(quantity[1]!, archivedHabitNames),
       null,
-      activityDate(quantity[4]!, submittedAt),
+      activityDate(quantity[4]!, submittedAt), quantity[4]!.toLowerCase(),
       Number(quantity[2]),
       quantity[3]!.trim().toLocaleLowerCase(),
     );
@@ -80,7 +80,7 @@ export function interpretStatement(
       matchingHabitNames(duration[1]!, activeHabitNames),
       matchingHabitNames(duration[1]!, archivedHabitNames),
       duration[2] ? Number(duration[2]) : null,
-      activityDate(duration[3]!, submittedAt),
+      activityDate(duration[3]!, submittedAt), duration[3]!.toLowerCase(),
       null,
       null,
     );
@@ -94,6 +94,7 @@ function entryProposal(
   archivedMatches: string[],
   durationMinutes: number | null,
   date: string,
+  sourceDatePhrase: string,
   quantityAmount: number | null,
   quantityUnit: string | null,
 ): InterpretationProposal {
@@ -103,6 +104,7 @@ function entryProposal(
       habitName: archivedMatches[0]!,
       durationMinutes,
       activityDate: date,
+      sourceDatePhrase,
       quantityAmount,
       quantityUnit,
     };
@@ -114,6 +116,7 @@ function entryProposal(
       habitName: activeMatches[0]!,
       durationMinutes,
       activityDate: date,
+      sourceDatePhrase,
       quantityAmount,
       quantityUnit,
     };
@@ -123,6 +126,7 @@ function entryProposal(
     candidateHabitNames: activeMatches,
     durationMinutes,
     activityDate: date,
+    sourceDatePhrase,
     quantityAmount,
     quantityUnit,
   };

@@ -17,6 +17,7 @@ describe("Habit Statement interpretation", () => {
       habitName: "Meditation",
       durationMinutes: 20,
       activityDate: "2026-09-15",
+      sourceDatePhrase: "yesterday",
       quantityAmount: null,
       quantityUnit: null,
     });
@@ -28,6 +29,7 @@ describe("Habit Statement interpretation", () => {
       habitName: "Reading",
       durationMinutes: null,
       activityDate: "2026-09-16",
+      sourceDatePhrase: "today",
       quantityAmount: 20,
       quantityUnit: "pages",
     });
@@ -55,6 +57,7 @@ describe("Habit Statement interpretation", () => {
       habitName: "Swimming",
       durationMinutes: 30,
       activityDate: "2026-09-16",
+      sourceDatePhrase: "today",
       quantityAmount: null,
       quantityUnit: null,
     });
