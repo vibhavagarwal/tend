@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "Tend",
+    "slug": "tend",
+    "version": "1.0.0",
+    "icon": "./assets/tend-icon.png",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "android": {
+      "package": "com.vibhavagarwal.tend"
+    },
+    "plugins": [
+      "expo-dev-client",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Allow Tend to use the microphone for speech recognition.",
+          "androidSpeechServicePackages": [
+            "com.google.android.googlequicksearchbox",
+            "com.google.android.tts",
+            "com.google.android.as"
+          ]
+        }
+      ]
+    ]
+  }
+}
