@@ -9,6 +9,8 @@ confirmed before it is saved. V1 data remains on the device.
 - Node.js 20 or newer
 - npm
 - Android Studio and an Android SDK for native device builds
+- JDK 17 for Gradle builds (Android Studio's Java 25 runtime is not compatible
+  with the current Gradle/Kotlin toolchain)
 - A compatible Android speech-recognition service for voice input
 
 ## Setup
@@ -21,6 +23,10 @@ npm start
 Use `npm run android` to create or run an Android development build. Do not
 install a development build over an active physical-device acceptance baseline
 without confirming that the baseline is no longer needed.
+
+On Windows, keep the native build checkout at a short path (for example,
+`C:\tend-build`). React Native CMake object paths can exceed Windows' 260
+character limit when the project is nested under a long directory name.
 
 ## Validation
 
