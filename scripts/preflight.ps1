@@ -35,14 +35,16 @@ try {
     Check ($devices.Count -gt 0) "ADB available; connected device(s): $($devices -join ', ')" "ADB is available but no authorized Android device is connected."
   } catch { $failures.Add($_.Exception.Message); Write-Host "FAIL  $($_.Exception.Message)" }
   Check (Test-Path 'android\gradlew.bat') 'Generated Android Gradle wrapper is present.' 'Generated Android files are absent; run npm run android:prepare.'
-  if ($failures.Count -eq 0) {
+  if (Test-Path 'android\gradlew.bat') {
     try {
       Use-TendBuildEnvironment
-      & .\android\gradlew.bat help --no-daemon --console=plain
+      Push-Location 'android'
+      & .\gradlew.bat help --no-daemon --console=plain
       if ($LASTEXITCODE -ne 0) { throw "Gradle could not load the Android project (exit code $LASTEXITCODE)." }
       Write-Host 'PASS  Gradle loaded the Android project.'
     } catch { $failures.Add($_.Exception.Message); Write-Host "FAIL  $($_.Exception.Message)" }
-  } else { Write-Host 'SKIP  Gradle load because prerequisite checks failed.' }
+    finally { Pop-Location }
+  } else { Write-Host 'SKIP  Gradle load because the generated Android project is absent.' }
 } finally { Pop-Location }
 if ($failures.Count -gt 0) { Write-Host "Preflight failed with $($failures.Count) issue(s). No repair was attempted."; exit 1 }
 Write-Host 'Preflight passed.'
