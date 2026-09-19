@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108"><rect width="108" height="108" fill="#006B5F"/><g transform="translate(54 54) scale(.62) translate(-54 -54)"><path fill="#fff" d="M50 79h8V49h-8zm4-29C37 50 27 40 27 23c17 0 27 10 27 27zm0 12c0-17 10-27 27-27 0 17-10 27-27 27z"/></g></svg></template>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Karla:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #EBEFEE; }
+  a { color: #006B5F; text-decoration: underline; text-underline-offset: 3px; }
+  a:hover { color: #00463E; }
+</style>
+</helmet>
+
+<div style="max-width:1000px;margin:0 auto;padding:64px 32px 96px;font-family:'Karla',sans-serif;color:#17211F;display:flex;flex-direction:column;gap:56px">
+
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:center;gap:14px">
+      <img src="assets/tend-icon.svg" alt="" style="width:44px;height:44px;border-radius:12px;display:block">
+      <img src="assets/tend-wordmark.png" alt="Tend" style="width:150px;height:auto;display:block">
+    </div>
+    <div style="font-family:'EB Garamond',serif;font-size:44px;line-height:1.1;padding-top:8px">Design system summary</div>
+    <div style="font-size:17px;line-height:1.65;color:#3E4C49;max-width:70ch;text-wrap:pretty">Everything the chosen direction — still point, voice first — relies on. Semantic roles only; no named colours in code, no component library beyond the primitives listed here. Screens: <a href="Tend 3a.dc.html">Tend, spoken</a>.</div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#5A6B68">01 · Palette tokens</div>
+    <div style="font-size:16px;line-height:1.65;color:#3E4C49;max-width:70ch">Seven roles, mapped for light and dark, following the device setting. No in-app theme selector, no dynamic/wallpaper colour. Accent is the app icon's teal so the mark and the interface agree.</div>
+    <div style="display:flex;flex-direction:column;gap:1px;background:#D7DFDC;border:1px solid #D7DFDC;border-radius:14px;overflow:hidden">
+      <div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.6fr);gap:1px;background:#D7DFDC;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#5A6B68">
+        <div style="background:#F9FBFA;padding:12px 16px">Role</div>
+        <div style="background:#F9FBFA;padding:12px 16px">Light</div>
+        <div style="background:#F9FBFA;padding:12px 16px">Dark</div>
+        <div style="background:#F9FBFA;padding:12px 16px">Used for</div>
+      </div>
+      <div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.6fr);gap:1px;background:#D7DFDC;font-size:15px">
+        <div style="background:#F9FBFA;padding:14px 16px">background</div>
+        <div style="background:#F9FBFA;padding:14px 16px;display:flex;align-items:center;gap:10px"><span style="width:18px;height:18px;border-radius:5px;background:#EBEFEE;border:1px solid #D7DFDC"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px">#EBEFEE</span></div>
+        <div style="background:#F9FBFA;padding:14px 16px;display:flex;align-items:center;gap:10px"><span style="width:18px;height:18px;border-radius:5px;background:#0E1514"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px">#0E1514</span></div>
+        <div style="background:#F9FBFA;padding:14px 16px;color:#3E4C49">Every screen ground</div>
+      </div>
+      <div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.6fr);gap:1px;background:#D7DFDC;font-size:15px">
+        <div style="background:#F9FBFA;padding:14px 16px">surface</div>
+        <div style="background:#F9FBFA;padding:14px 16px;display:flex;align-items:center;gap:10px"><span style="width:18px;height:18px;border-radius:5px;background:#F9FBFA;border:1px solid #D7DFDC"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px">#F9FBFA</span></div>
+        <div style="background:#F9FBFA;padding:14px 16px;display:flex;align-items:center;gap:10px"><span style="width:18px;height:18px;border-radius:5px;background:#16201E"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px">#16201E</span></div>
+        <div style="background:#F9FBFA;padding:14px 16px;color:#3E4C49">Sheets and dialogs only — Track and Reflect use none</div>
+      </div>
+      <div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.6fr);gap:1px;background:#D7DFDC;font-size:15px">
+        <div style="background:#F9FBFA;padding:14px 16px">primary text</div>
+        <div style="background:#F9FBFA;padding:14px 16px;display:flex;align-items:center;gap:10px"><span style="width:18px;height:18px;border-radius:5px;background:#17211F"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px">#17211F</span></div>
+        <div style="background:#F9FBFA;padding:14px 16px;display:flex;align-items:center;gap:10px"><span style="width:18px;height:18px;border-radius:5px;background:#E2EBE8;border:1px solid #D7DFDC"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px">#E2EBE8</span></div>
+        <div style="background:#F9FBFA;padding:14px 16px;color:#3E4C49">Habit names, entries, transcripts · 13.4:1 / 12.2:1</div>
+      </div>
+      <div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.6fr);gap:1px;background:#D7DFDC;font-size:15px">
+        <div style="background:#F9FBFA;padding:14px 16px">muted text</div>
+        <div style="background:#F9FBFA;padding:14px 16px;display:flex;align-items:center;gap:10px"><span style="width:18px;height:18px;border-radius:5px;background:#5A6B68"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px">#5A6B68</span></div>
+        <div style="background:#F9FBFA;padding:14px 16px;display:flex;align-items:center;gap:10px"><span style="width:18px;height:18px;border-radius:5px;background:#90A39F"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px">#90A39F</span></div>
+        <div style="background:#F9FBFA;padding:14px 16px;color:#3E4C49">Captions, counts, dates, quiet history · 5.6:1 / 4.9:1. Never lightened further with opacity</div>
+      </div>
+      <div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.6fr);gap:1px;background:#D7DFDC;font-size:15px">
+        <div style="background:#F9FBFA;padding:14px 16px">quiet accent</div>
+        <div style="background:#F9FBFA;padding:14px 16px;display:flex;align-items:center;gap:10px"><span style="width:18px;height:18px;border-radius:5px;background:#006B5F"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px">#006B5F</span></div>
+        <div style="background:#F9FBFA;padding:14px 16px;display:flex;align-items:center;gap:10px"><span style="width:18px;height:18px;border-radius:5px;background:#6FBFB2"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px">#6FBFB2</span></div>
+        <div style="background:#F9FBFA;padding:14px 16px;color:#3E4C49">Primary fill, outlines, control labels, level bars · 6.4:1 with #F9FBFA on it</div>
+      </div>
+      <div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.6fr);gap:1px;background:#D7DFDC;font-size:15px">
+        <div style="background:#F9FBFA;padding:14px 16px">affirmation</div>
+        <div style="background:#F9FBFA;padding:14px 16px;display:flex;align-items:center;gap:10px"><span style="width:18px;height:18px;border-radius:5px;background:#D9E7E1;border:1px solid #D7DFDC"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px">#D9E7E1</span></div>
+        <div style="background:#F9FBFA;padding:14px 16px;display:flex;align-items:center;gap:10px"><span style="width:18px;height:18px;border-radius:5px;background:#172927"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px">#172927</span></div>
+        <div style="background:#F9FBFA;padding:14px 16px;color:#3E4C49">Reserved for the acknowledgment. Unused in this layout, which uses a rule instead — keep the token for sheet variants</div>
+      </div>
+      <div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.6fr);gap:1px;background:#D7DFDC;font-size:15px">
+        <div style="background:#F9FBFA;padding:14px 16px">hairline<br><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5A6B68">+ emphasis</span></div>
+        <div style="background:#F9FBFA;padding:14px 16px;display:flex;align-items:center;gap:10px"><span style="width:18px;height:18px;border-radius:5px;background:#D7DFDC"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px">#D7DFDC<br>#A9BCB6</span></div>
+        <div style="background:#F9FBFA;padding:14px 16px;display:flex;align-items:center;gap:10px"><span style="width:18px;height:18px;border-radius:5px;background:#26302E"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px">#26302E<br>#3A4A47</span></div>
+        <div style="background:#F9FBFA;padding:14px 16px;color:#3E4C49">Row separators and the 56px centred rule. Emphasis tone marks the acknowledgment rule and the focused field</div>
+      </div>
+    </div>
+    <div style="font-size:15px;line-height:1.65;color:#5A6B68;max-width:70ch">Colour carries interface meaning only — action, focus, confirmation, error. It never grades a habit, never marks absence, never signals volume.</div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#5A6B68">02 · Typography roles</div>
+    <div style="display:flex;flex-wrap:wrap;gap:20px">
+      <div style="flex:1 1 280px;min-width:0;background:#F9FBFA;border:1px solid #D7DFDC;border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:10px">
+        <div style="font-family:'EB Garamond',serif;font-size:34px;line-height:1.1">Expressive</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5A6B68">EB Garamond · 400 / 400 italic</div>
+        <div style="font-size:15px;line-height:1.65;color:#3E4C49">Headings (34), prompts (31), recap sentence (29), transcripts (28 italic), send-off (26), acknowledgment (27 italic), habit under review (44). Reversible: italic for what was heard, roman for what Tend says.</div>
+      </div>
+      <div style="flex:1 1 280px;min-width:0;background:#F9FBFA;border:1px solid #D7DFDC;border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:30px;line-height:1.1;font-weight:500">Functional</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5A6B68">Karla · 400 / 500</div>
+        <div style="font-size:15px;line-height:1.65;color:#3E4C49">Entry fields (19), list lines and totals (17), dates and helper text (16), tertiary controls (15). Never below 15. Buttons 17 regular — no all-caps.</div>
+      </div>
+      <div style="flex:1 1 280px;min-width:0;background:#F9FBFA;border:1px solid #D7DFDC;border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:10px">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.1">Caption</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5A6B68">IBM Plex Mono · 400</div>
+        <div style="font-size:15px;line-height:1.65;color:#3E4C49">Section labels (11, uppercase, .14em), counts inside recap lines (15), week range and parse line (11–12). The only place letter-spacing is used.</div>
+      </div>
+    </div>
+    <div style="font-size:15px;line-height:1.65;color:#5A6B68;max-width:70ch">Device text scaling to 200% is supported: every block is flow-sized, nothing is height-capped, and the composer keeps its space by pushing history down rather than clipping.</div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:20px">
+    <div style="flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:16px">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#5A6B68">03 · Spacing</div>
+      <div style="font-size:16px;line-height:1.75;color:#3E4C49">Base unit 6. Scale 6 · 12 · 14 · 22 · 26 · 34 · 52. Screen padding 16 top, 26 sides, 20 bottom. Header to wordmark 14. Label to display line 14–16. Display line to primary action 22–26. Centred rule 56 wide with 30–34 above and 20–22 below. History lines 14 apart. Held space above and below the composer is elastic, not fixed — it absorbs text scaling first.</div>
+    </div>
+    <div style="flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:16px">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#5A6B68">04 · Shape and elevation</div>
+      <div style="font-size:16px;line-height:1.75;color:#3E4C49">Actions are full pills (999). App icon 11. Screen corners 36. No cards, no panels, no shadows anywhere in the app — the only shadow in the mockups belongs to the device bezel. Structure comes from 1px hairlines, the 56px rule, and space. Focused text field: 1px accent underline, no fill.</div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#5A6B68">05 · Action hierarchy</div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:18px;background:#F9FBFA;border:1px solid #D7DFDC;border-radius:16px;padding:18px 20px">
+        <div style="min-width:190px;min-height:60px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:#006B5F;color:#F9FBFA;font-size:17px">Hold to speak</div>
+        <div style="flex:1 1 280px;min-width:0;font-size:15px;line-height:1.65;color:#3E4C49"><span style="font-weight:500">Primary — 60px filled pill.</span> Exactly one per state: Hold to speak, or Save activity once something has been heard. Full width of the content column.</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:18px;background:#F9FBFA;border:1px solid #D7DFDC;border-radius:16px;padding:18px 20px">
+        <div style="min-width:190px;display:flex;gap:10px">
+          <div style="min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid #006B5F;border-radius:999px;font-size:15px;color:#006B5F">Reflect</div>
+          <div style="min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid #D7DFDC;border-radius:999px;font-size:15px;color:#006B5F">← Track</div>
+        </div>
+        <div style="flex:1 1 280px;min-width:0;font-size:15px;line-height:1.65;color:#3E4C49"><span style="font-weight:500">Secondary — 44px outlined pill.</span> Navigation and stop: Reflect, Back, Done. Accent outline when it is the way forward, hairline outline when it is a return.</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:18px;background:#F9FBFA;border:1px solid #D7DFDC;border-radius:16px;padding:18px 20px">
+        <div style="min-width:190px;display:flex;gap:20px;align-items:center">
+          <span style="font-size:15px;color:#006B5F">Edit as text</span>
+          <span style="font-size:15px;color:#5A6B68">Cancel</span>
+        </div>
+        <div style="flex:1 1 280px;min-width:0;font-size:15px;line-height:1.65;color:#3E4C49"><span style="font-weight:500">Tertiary — 44px text.</span> Accent for alternative paths (Type instead, Edit as text, New habit); muted for retreat (Cancel, Not now, Say it again). No underline, so links and controls stay distinguishable.</div>
+      </div>
+    </div>
+    <div style="font-size:15px;line-height:1.65;color:#5A6B68;max-width:70ch">Reflect has no primary action at all — it is read-only, and its only controls are Back and the system back gesture. No bottom navigation anywhere.</div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:20px">
+    <div style="flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:16px">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#5A6B68">06 · Motion</div>
+      <div style="font-size:16px;line-height:1.75;color:#3E4C49">Five 3px level bars are the only continuous movement in the app; they follow microphone level and settle the instant listening stops. Acknowledgment: 200ms fade with a 4px rise, then it stays until the next action — no dismissal, no second confirmation. Track ↔ Reflect: 220ms cross-fade, reversed on Back. New history line: 160ms fade, list does not animate its reflow. Transcript text replaces itself with no typing effect. Nothing loops, nothing delays a save, nothing celebrates. Reduced motion: all transitions become instant and the bars hold at rest while the word “Listening” carries the state.</div>
+    </div>
+    <div style="flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:16px">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#5A6B68">07 · Voice, copy and recap rules</div>
+      <div style="font-size:16px;line-height:1.75;color:#3E4C49">Four states on one screen: ready → listening → heard → saved. Speech creates habits (“I would like to track swimming”) and entries (“I swam for 20 minutes yesterday”); the Activity Date is resolved from the sentence and shown in words before saving, with the raw phrase printed beneath. Text is the correction path and the recognition-failure path. Acknowledgments come from a fixed local corpus of 24 messages rotated globally, never repeating until exhausted, never naming the habit, duration, momentum or the person. Habit creation returns the fixed send-off instead. Reflect reports frequency only, Monday–Sunday by Activity Date, no zero-count habits, archived habits last and marked, sentence form up to three habits and a list at four or more.</div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:16px;border-top:1px solid #D7DFDC;padding-top:32px">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#5A6B68">Outside this system</div>
+    <div style="font-size:16px;line-height:1.75;color:#3E4C49;max-width:80ch">Streaks, targets, scores, charts, dashboard cards, recap notifications, unread badges or review-due prompts, garden or wilting imagery, in-app theme switcher, wallpaper/dynamic colour, bottom navigation, accounts, cloud sync, shared data, and any LLM or network call in Reflect or in the acknowledgment corpus.</div>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}"></script>
+</body>
+</html>

@@ -4,6 +4,9 @@ Tend is a calm, voice-first Android habit tracker. Habit Statements can be
 spoken or typed, but every meaningful change is reviewed and explicitly
 confirmed before it is saved. V1 data remains on the device.
 
+See [the documentation guide](docs/README.md) for the authoritative product,
+domain, decision, and approved Tend design references.
+
 ## Windows Android development
 
 The canonical Tend checkout is `C:\dev\tend`. Keep it at this short path:
