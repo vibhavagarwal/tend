@@ -6,6 +6,10 @@
   "scripts": {
     "start": "expo start --dev-client",
     "android": "expo run:android",
+    "android:prepare": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\prepare-android.ps1",
+    "android:build": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\build-android.ps1",
+    "android:install": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\install-android.ps1",
+    "preflight": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\preflight.ps1",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "export:android": "expo export --platform android",
