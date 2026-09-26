@@ -91,6 +91,7 @@ function TendApp() {
   const [screen, setScreen] = useState<"track" | "reflect">("track");
   const [acknowledgment, setAcknowledgment] = useState<string | null>(null);
   const [creationSendOff, setCreationSendOff] = useState<string | null>(null);
+  const [trackViewportHeight, setTrackViewportHeight] = useState(0);
   const saveChain = useRef(Promise.resolve());
   const trackScrollRef = useRef<ScrollView>(null);
 
@@ -388,27 +389,74 @@ function TendApp() {
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.flex}>
         <ScrollView
           ref={trackScrollRef}
+          onLayout={({ nativeEvent }) => setTrackViewportHeight(nativeEvent.layout.height)}
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
           accessibilityLabel="Tend Track"
         >
-          <View style={styles.header}>
-            <TendMark />
-            <Pressable
-              accessibilityHint="Open your saved activity reflection"
-              accessibilityRole="button"
-              onPress={() => setScreen("reflect")}
-              style={[styles.reflect, { borderColor: colors.hairline }]}
-            >
-              <Text style={[type.tertiary, { color: colors.mutedText }]}>Reflect</Text>
-            </Pressable>
-          </View>
-          <Wordmark colors={colors} subdued={listening} />
+          <View style={[styles.trackHero, trackViewportHeight > 0 ? { minHeight: trackViewportHeight } : undefined]}>
+            <View style={styles.header}>
+              <TendMark />
+              <Pressable
+                accessibilityHint="Open your saved activity reflection"
+                accessibilityRole="button"
+                onPress={() => setScreen("reflect")}
+                style={[styles.reflect, { borderColor: colors.hairline }]}
+              >
+                <Text style={[type.tertiary, { color: colors.mutedText }]}>Reflect</Text>
+              </Pressable>
+            </View>
+            <Wordmark colors={colors} subdued={listening} />
 
-          <View style={styles.composerSpace}>
-            {postAchievementMessage ? (
-              <View style={styles.postSaveComposer}>
-                <Acknowledgment colors={colors} message={postAchievementMessage} />
+            <View style={styles.composerSpace}>
+              {postAchievementMessage ? (
+                <View style={styles.postSaveComposer}>
+                  <Acknowledgment colors={colors} message={postAchievementMessage} />
+                  <ReadyComposer
+                    colors={colors}
+                    speechDetail={speech.detail}
+                    heard={speech.status === "heard" ? speech.finalTranscript : ""}
+                    onSpeak={speech.start}
+                    onType={() => {
+                      if (recoveryText) setStatement(recoveryText);
+                      setTyping(true);
+                    }}
+                  />
+                </View>
+              ) : listening ? (
+                <ListeningComposer
+                  colors={colors}
+                  transcript={speech.partialTranscript || speech.finalTranscript}
+                  volume={speech.volume}
+                  reduceMotion={reduceMotion}
+                  onDone={speech.done}
+                  onCancel={speech.cancel}
+                  canAct={speech.status === "starting" || speech.status === "listening"}
+                />
+              ) : inReview ? (
+                <ReviewComposer
+                  colors={colors}
+                  statement={statement}
+                  proposal={proposal}
+                  validatedEntry={validatedEntry}
+                  duplicate={duplicate}
+                  onConfirm={confirmReview}
+                  onChooseHabit={chooseHabit}
+                  onEdit={editStatement}
+                  onUpdateEntry={updateEntryReview}
+                  onCancel={cancelReview}
+                />
+              ) : typing ? (
+                <TypedComposer
+                  colors={colors}
+                  statement={statement}
+                  setStatement={setStatement}
+                  onSubmit={() => { void submitStatement(); }}
+                  onSpeak={speech.start}
+                  isInterpreting={isInterpreting}
+                  showCreationHint={active.length === 0}
+                />
+              ) : (
                 <ReadyComposer
                   colors={colors}
                   speechDetail={speech.detail}
@@ -419,52 +467,8 @@ function TendApp() {
                     setTyping(true);
                   }}
                 />
-              </View>
-            ) : listening ? (
-              <ListeningComposer
-                colors={colors}
-                transcript={speech.partialTranscript || speech.finalTranscript}
-                volume={speech.volume}
-                reduceMotion={reduceMotion}
-                onDone={speech.done}
-                onCancel={speech.cancel}
-                canAct={speech.status === "starting" || speech.status === "listening"}
-              />
-            ) : inReview ? (
-              <ReviewComposer
-                colors={colors}
-                statement={statement}
-                proposal={proposal}
-                validatedEntry={validatedEntry}
-                duplicate={duplicate}
-                onConfirm={confirmReview}
-                onChooseHabit={chooseHabit}
-                onEdit={editStatement}
-                onUpdateEntry={updateEntryReview}
-                onCancel={cancelReview}
-              />
-            ) : typing ? (
-              <TypedComposer
-                colors={colors}
-                statement={statement}
-                setStatement={setStatement}
-                onSubmit={() => { void submitStatement(); }}
-                onSpeak={speech.start}
-                isInterpreting={isInterpreting}
-                showCreationHint={active.length === 0}
-              />
-            ) : (
-              <ReadyComposer
-                colors={colors}
-                speechDetail={speech.detail}
-                heard={speech.status === "heard" ? speech.finalTranscript : ""}
-                onSpeak={speech.start}
-                onType={() => {
-                  if (recoveryText) setStatement(recoveryText);
-                  setTyping(true);
-                }}
-              />
-            )}
+              )}
+            </View>
           </View>
 
           {message ? <Text accessibilityLiveRegion="polite" style={[type.body, styles.message, { color: colors.error }]}>{message}</Text> : null}
@@ -842,8 +846,9 @@ const styles = StyleSheet.create({
   loading: { flex: 1, alignItems: "center", justifyContent: "center" },
   content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 52, alignItems: "center", gap: spacing.md },
   header: { width: "100%", flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  trackHero: { width: "100%", gap: spacing.md },
   reflect: { minHeight: 44, borderWidth: 1, borderRadius: 999, alignItems: "center", justifyContent: "center", paddingHorizontal: 20, opacity: 0.68 },
-  composerSpace: { width: "100%", minHeight: 345, justifyContent: "center" },
+  composerSpace: { width: "100%", minHeight: 345, flexGrow: 1, justifyContent: "center" },
   composer: { width: "100%", gap: spacing.sm },
   postSaveComposer: { width: "100%", gap: spacing.md },
   center: { textAlign: "center" },
