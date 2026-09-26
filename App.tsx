@@ -3,6 +3,7 @@ import {
   AccessibilityInfo,
   ActivityIndicator,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -29,7 +30,7 @@ import {
 } from "./src/domain/tend";
 import { interpretHabitStatement } from "./src/domain/interpreter";
 import { nextAcknowledgment } from "./src/domain/acknowledgment";
-import { currentWeekRange, reflectionCounts } from "./src/domain/reflection";
+import { currentWeekRange, recentActivities, reflectionCounts } from "./src/domain/reflection";
 import {
   emptyTendData,
   Habit,
@@ -45,6 +46,7 @@ import { Action, InlineSection, Rule, SectionLabel, TendMark, TextBlock, Wordmar
 import { palette, spacing, type } from "./src/ui/theme";
 
 type HabitStatusProposal = { habit: Habit; action: "archive" | "restore"; fromStatement?: boolean };
+const POST_SAVE_ACKNOWLEDGMENT_MS = 6_000;
 
 const formatDate = (isoDate: string) => {
   const [year, month, day] = isoDate.split("-").map(Number);
@@ -90,6 +92,7 @@ function TendApp() {
   const [acknowledgment, setAcknowledgment] = useState<string | null>(null);
   const [creationSendOff, setCreationSendOff] = useState<string | null>(null);
   const saveChain = useRef(Promise.resolve());
+  const trackScrollRef = useRef<ScrollView>(null);
 
   const persist = useCallback((next: TendData) => {
     saveChain.current = saveChain.current
@@ -147,6 +150,18 @@ function TendApp() {
     const subscription = AccessibilityInfo.addEventListener("reduceMotionChanged", setReduceMotion);
     return () => subscription.remove();
   }, []);
+
+  const postAchievementMessage = acknowledgment ?? creationSendOff;
+
+  useEffect(() => {
+    if (!postAchievementMessage) return;
+    requestAnimationFrame(() => trackScrollRef.current?.scrollTo({ y: 0, animated: !reduceMotion }));
+    const timeout = setTimeout(() => {
+      setAcknowledgment(null);
+      setCreationSendOff(null);
+    }, POST_SAVE_ACKNOWLEDGMENT_MS);
+    return () => clearTimeout(timeout);
+  }, [postAchievementMessage, reduceMotion]);
 
   const clearReview = useCallback((clearStatement = false) => {
     setProposal(null);
@@ -372,6 +387,7 @@ function TendApp() {
       <StatusBar style={colors.dark ? "light" : "dark"} />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.flex}>
         <ScrollView
+          ref={trackScrollRef}
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
           accessibilityLabel="Tend Track"
@@ -390,7 +406,21 @@ function TendApp() {
           <Wordmark colors={colors} subdued={listening} />
 
           <View style={styles.composerSpace}>
-            {listening ? (
+            {postAchievementMessage ? (
+              <View style={styles.postSaveComposer}>
+                <Acknowledgment colors={colors} message={postAchievementMessage} />
+                <ReadyComposer
+                  colors={colors}
+                  speechDetail={speech.detail}
+                  heard={speech.status === "heard" ? speech.finalTranscript : ""}
+                  onSpeak={speech.start}
+                  onType={() => {
+                    if (recoveryText) setStatement(recoveryText);
+                    setTyping(true);
+                  }}
+                />
+              </View>
+            ) : listening ? (
               <ListeningComposer
                 colors={colors}
                 transcript={speech.partialTranscript || speech.finalTranscript}
@@ -439,9 +469,6 @@ function TendApp() {
 
           {message ? <Text accessibilityLiveRegion="polite" style={[type.body, styles.message, { color: colors.error }]}>{message}</Text> : null}
 
-          {acknowledgment ? <Acknowledgment colors={colors} message={acknowledgment} /> : null}
-          {creationSendOff ? <Text accessibilityLiveRegion="polite" style={[type.title, styles.center, { color: colors.primaryText }]}>{creationSendOff}</Text> : null}
-
           {needsRetryCount > 0 ? (
             <TextBlock colors={colors} style={{ color: colors.mutedText }}>
               {needsRetryCount} statement{needsRetryCount === 1 ? "" : "s"} Needs retry. Tend will retry when interpretation is available.
@@ -452,29 +479,6 @@ function TendApp() {
               <Text style={[type.title, { color: colors.primaryText }]}>Interpretation ready for review</Text>
               <TextBlock colors={colors}>Review it before Tend saves anything.</TextBlock>
               <Action colors={colors} onPress={reviewReady}>Review</Action>
-            </InlineSection>
-          ) : null}
-
-          {statusProposal ? (
-            <InlineSection colors={colors}>
-              <Text style={[type.title, { color: colors.primaryText }]}>
-                {statusProposal.action === "archive" ? "Archive" : "Restore"} {statusProposal.habit.name}?
-              </Text>
-              <TextBlock colors={colors}>
-                {statusProposal.action === "archive"
-                  ? "This Habit will leave Active Habits, but its Habit Entries will be kept."
-                  : "This Habit will return to Active Habits and can be matched again."}
-              </TextBlock>
-              <Action colors={colors} onPress={() => {
-                const changed = commitData((current) => statusProposal.action === "archive"
-                  ? archiveHabit(current, statusProposal.habit.id)
-                  : restoreHabit(current, statusProposal.habit.id));
-                if (changed) {
-                  setStatusProposal(null);
-                  if (statusProposal.fromStatement) resetComposer();
-                }
-              }}>{statusProposal.action === "archive" ? "Confirm archive" : "Confirm restore"}</Action>
-              <Action colors={colors} variant="retreat" onPress={() => setStatusProposal(null)}>Cancel</Action>
             </InlineSection>
           ) : null}
 
@@ -502,6 +506,21 @@ function TendApp() {
             onRestore={(habit) => setStatusProposal({ habit, action: "restore" })}
           />
         </ScrollView>
+        <HabitStatusConfirmation
+          colors={colors}
+          proposal={statusProposal}
+          onConfirm={() => {
+            if (!statusProposal) return;
+            const changed = commitData((current) => statusProposal.action === "archive"
+              ? archiveHabit(current, statusProposal.habit.id)
+              : restoreHabit(current, statusProposal.habit.id));
+            if (changed) {
+              setStatusProposal(null);
+              if (statusProposal.fromStatement) resetComposer();
+            }
+          }}
+          onCancel={() => setStatusProposal(null)}
+        />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -699,6 +718,33 @@ function Acknowledgment({ colors, message }: ColorProps & { message: string }) {
   );
 }
 
+function HabitStatusConfirmation({ colors, proposal, onConfirm, onCancel }: ColorProps & {
+  proposal: HabitStatusProposal | null;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  if (!proposal) return null;
+  const archiving = proposal.action === "archive";
+  return (
+    <Modal transparent animationType="fade" visible onRequestClose={() => undefined}>
+      <View accessibilityViewIsModal style={styles.modalBackdrop}>
+        <View style={[styles.modalCard, { backgroundColor: colors.background, borderColor: colors.emphasis }]}>
+          <Text style={[type.heading, styles.center, { color: colors.primaryText }]}>
+            {archiving ? "Archive" : "Restore"} {proposal.habit.name}?
+          </Text>
+          <TextBlock colors={colors} style={styles.center}>
+            {archiving
+              ? "This Habit will leave Active Habits, but its Habit Entries will be kept."
+              : "This Habit will return to Active Habits and can be matched again."}
+          </TextBlock>
+          <Action colors={colors} onPress={onConfirm}>{archiving ? "Confirm archive" : "Confirm restore"}</Action>
+          <Action colors={colors} variant="retreat" onPress={onCancel}>Cancel</Action>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
 function ReflectScreen({ colors, data, onBack }: ColorProps & { data: TendData; onBack: () => void }) {
   const range = currentWeekRange();
   const weekly = reflectionCounts(data, range);
@@ -730,17 +776,16 @@ function ReflectScreen({ colors, data, onBack }: ColorProps & { data: TendData; 
 }
 
 function ReflectionCounts({ colors, items }: ColorProps & { items: ReturnType<typeof reflectionCounts> }) {
-  if (items.length <= 3) return <Text style={[type.title, styles.center, { color: colors.primaryText }]}>{items.map(({ habit, count }) => `${habit.name}${habit.archivedAt !== null ? " (archived)" : ""} — ${count} ${count === 1 ? "time" : "times"}`).join("; ")}</Text>;
   return <View style={styles.section}>{items.map(({ habit, count }) => <Text key={habit.id} style={[type.list, { color: colors.primaryText }]}>{habit.name}{habit.archivedAt !== null ? " (archived)" : ""} — {count} {count === 1 ? "time" : "times"}</Text>)}</View>;
 }
 
 function History({ colors, data, onDelete }: ColorProps & { data: TendData; onDelete: (entry: HabitEntry) => void }) {
   return (
     <View style={styles.section} accessibilityLabel="Recent Habit Entries">
-      <SectionLabel colors={colors}>Recent Habit Entries</SectionLabel>
+      <SectionLabel colors={colors}>Last 5 recent activities</SectionLabel>
       {data.entries.length === 0 ? (
         <Text style={[type.body, styles.center, { color: colors.mutedText }]}>Your confirmed activity will appear here.</Text>
-      ) : data.entries.slice(0, 12).map((entry) => (
+      ) : recentActivities(data).map((entry) => (
         <View key={entry.id} style={styles.row} accessibilityLabel={`Recent Habit Entry: ${entrySummary(entry, data)}`}>
           <View style={styles.flex}>
             <Text style={[type.list, { color: colors.primaryText }]}>{entrySummary(entry, data)}</Text>
@@ -800,6 +845,7 @@ const styles = StyleSheet.create({
   reflect: { minHeight: 44, borderWidth: 1, borderRadius: 999, alignItems: "center", justifyContent: "center", paddingHorizontal: 20, opacity: 0.68 },
   composerSpace: { width: "100%", minHeight: 345, justifyContent: "center" },
   composer: { width: "100%", gap: spacing.sm },
+  postSaveComposer: { width: "100%", gap: spacing.md },
   center: { textAlign: "center" },
   input: { minHeight: 92, maxHeight: 190, borderBottomWidth: 1, textAlignVertical: "top", paddingHorizontal: 4, paddingVertical: 12 },
   fieldInput: { minHeight: 44, borderBottomWidth: 1, paddingHorizontal: 4, paddingVertical: 8 },
@@ -809,6 +855,8 @@ const styles = StyleSheet.create({
   level: { width: 3, borderRadius: 2 },
   actionRow: { flexDirection: "row", gap: spacing.xs },
   acknowledgment: { width: "100%", borderTopWidth: 1, paddingVertical: spacing.md, paddingHorizontal: spacing.sm },
+  modalBackdrop: { flex: 1, alignItems: "center", justifyContent: "center", padding: spacing.lg, backgroundColor: "rgba(0, 0, 0, 0.38)" },
+  modalCard: { width: "100%", maxWidth: 420, borderWidth: 1, borderRadius: 20, padding: spacing.lg, gap: spacing.md },
   section: { width: "100%", gap: spacing.sm },
   row: { width: "100%", minHeight: 52, flexDirection: "row", alignItems: "center", gap: spacing.sm },
 });

@@ -1,6 +1,7 @@
-import { Habit, TendData } from "./types";
+import { Habit, HabitEntry, TendData } from "./types";
 
 export type ReflectionCount = { habit: Habit; count: number };
+export const RECENT_ACTIVITY_LIMIT = 5;
 
 const isoDate = (date: Date) => `${date.getFullYear()}-${`${date.getMonth() + 1}`.padStart(2, "0")}-${`${date.getDate()}`.padStart(2, "0")}`;
 
@@ -24,4 +25,8 @@ export function reflectionCounts(data: TendData, range?: { start: string; end: s
     .filter((habit) => (counts.get(habit.id) ?? 0) > 0)
     .sort((a, b) => Number(a.archivedAt !== null) - Number(b.archivedAt !== null) || a.name.localeCompare(b.name))
     .map((habit) => ({ habit, count: counts.get(habit.id)! }));
+}
+
+export function recentActivities(data: TendData): HabitEntry[] {
+  return data.entries.slice(0, RECENT_ACTIVITY_LIMIT);
 }

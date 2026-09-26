@@ -13,6 +13,27 @@ describe("optional interpretation gateway", () => {
       .resolves.toEqual({ type: "createHabit", name: "Walking" });
   });
 
+  it("clarifies locally understood ambiguous entries without calling a configured gateway", async () => {
+    const fetchImpl = vi.fn() as unknown as typeof fetch;
+    await expect(interpretHabitStatement("I read for 20 minutes yesterday", {
+      ...context,
+      activeHabitNames: ["Reading", "Poetry Reading"],
+    }, {
+      baseUrl: "https://tend.example",
+      fetchImpl,
+      retryDelayMs: 0,
+    })).resolves.toEqual({
+      type: "clarifyHabitEntry",
+      candidateHabitNames: ["Reading", "Poetry Reading"],
+      durationMinutes: 20,
+      activityDate: "2026-09-15",
+      sourceDatePhrase: "yesterday",
+      quantityAmount: null,
+      quantityUnit: null,
+    });
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
   it("maps a validated gateway response to the Tend proposal model", async () => {
     let capturedInit: RequestInit | undefined;
     const fetchMock = vi.fn(async (_input: unknown, init?: RequestInit) => {

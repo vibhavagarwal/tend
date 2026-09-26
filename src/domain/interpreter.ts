@@ -33,7 +33,7 @@ export async function interpretHabitStatement(
     context.archivedHabitNames ?? [],
   );
   const baseUrl = options.baseUrl ?? configuredBaseUrl;
-  if (!baseUrl || localProposal.type === "futureActivityDate" || localProposal.type === "restoreAndLogHabitEntry") {
+  if (!baseUrl || !mayUseGateway(localProposal)) {
     return localProposal;
   }
 
@@ -59,6 +59,10 @@ export async function interpretHabitStatement(
     options.retryDelayMs ?? 1_000,
   );
   return parseGatewayProposal(await response.json(), context.activeHabitNames);
+}
+
+function mayUseGateway(proposal: InterpretationProposal): boolean {
+  return proposal.type === "unsupported" || proposal.type === "noMatchingActiveHabit";
 }
 
 async function requestWithRetry(

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { nextAcknowledgment, acknowledgments } from "../src/domain/acknowledgment";
-import { currentWeekRange, reflectionCounts } from "../src/domain/reflection";
+import { currentWeekRange, recentActivities, RECENT_ACTIVITY_LIMIT, reflectionCounts } from "../src/domain/reflection";
 import { emptyTendData } from "../src/domain/types";
 
 describe("Reflection", () => {
@@ -23,6 +23,23 @@ describe("Reflection", () => {
     };
     expect(reflectionCounts(data).map(({ habit, count }) => [habit.name, count])).toEqual([["Reading", 2], ["Meditation", 1]]);
     expect(reflectionCounts(data, { start: "2026-09-15", end: "2026-09-20" }).map(({ habit, count }) => [habit.name, count])).toEqual([["Reading", 2]]);
+  });
+
+  it("limits the Track-screen activity feed to the five most recent saved entries", () => {
+    const data = {
+      ...emptyTendData(),
+      entries: Array.from({ length: 6 }, (_, index) => ({
+        id: `${index + 1}`,
+        habitId: "habit",
+        activityDate: "2026-09-16",
+        durationMinutes: null,
+        quantityAmount: null,
+        quantityUnit: null,
+        createdAt: 6 - index,
+      })),
+    };
+    expect(recentActivities(data).map((entry) => entry.id)).toEqual(["1", "2", "3", "4", "5"]);
+    expect(recentActivities(data)).toHaveLength(RECENT_ACTIVITY_LIMIT);
   });
 });
 
