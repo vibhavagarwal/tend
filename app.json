@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "icon": "./assets/tend-icon.png",
     "orientation": "portrait",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "android": {
       "package": "com.vibhavagarwal.tend"
     },

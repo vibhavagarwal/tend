@@ -10,7 +10,6 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  useColorScheme,
   View,
 } from "react-native";
 import { useFonts } from "expo-font";
@@ -66,8 +65,7 @@ export default function App() {
 }
 
 function TendApp() {
-  const scheme = useColorScheme();
-  const colors = palette(scheme);
+  const colors = palette("light");
   const [fontsLoaded] = useFonts({
     EBGaramond: require("./assets/eb-garamond.ttf"),
     EBGaramondItalic: require("./assets/eb-garamond-italic.ttf"),
@@ -468,10 +466,9 @@ function TendApp() {
                   }}
                 />
               )}
+              {message ? <Text accessibilityLiveRegion="polite" style={[type.body, styles.message, { color: colors.error }]}>{message}</Text> : null}
             </View>
           </View>
-
-          {message ? <Text accessibilityLiveRegion="polite" style={[type.body, styles.message, { color: colors.error }]}>{message}</Text> : null}
 
           {needsRetryCount > 0 ? (
             <TextBlock colors={colors} style={{ color: colors.mutedText }}>
@@ -486,19 +483,6 @@ function TendApp() {
             </InlineSection>
           ) : null}
 
-          {deletionProposal ? (
-            <InlineSection colors={colors}>
-              <Text style={[type.title, { color: colors.primaryText }]}>Delete this Habit Entry?</Text>
-              <TextBlock colors={colors}>{entrySummary(deletionProposal, data)} on {formatDate(deletionProposal.activityDate)} will be removed.</TextBlock>
-              <Action colors={colors} onPress={() => {
-                if (commitData((current) => deleteHabitEntry(current, deletionProposal.id))) {
-                  setDeletionProposal(null);
-                }
-              }}>Confirm deletion</Action>
-              <Action colors={colors} variant="retreat" onPress={() => setDeletionProposal(null)}>Cancel</Action>
-            </InlineSection>
-          ) : null}
-
           <Rule colors={colors} />
           <History colors={colors} data={data} onDelete={setDeletionProposal} />
           <Rule colors={colors} />
@@ -510,9 +494,14 @@ function TendApp() {
             onRestore={(habit) => setStatusProposal({ habit, action: "restore" })}
           />
         </ScrollView>
-        <HabitStatusConfirmation
+        <ConfirmationDialog
           colors={colors}
-          proposal={statusProposal}
+          title={statusProposal ? `${statusProposal.action === "archive" ? "Archive" : "Restore"} ${statusProposal.habit.name}?` : ""}
+          detail={statusProposal?.action === "archive"
+            ? "This Habit will leave Active Habits, but its Habit Entries will be kept."
+            : "This Habit will return to Active Habits and can be matched again."}
+          confirmLabel={statusProposal?.action === "archive" ? "Confirm archive" : "Confirm restore"}
+          visible={statusProposal !== null}
           onConfirm={() => {
             if (!statusProposal) return;
             const changed = commitData((current) => statusProposal.action === "archive"
@@ -524,6 +513,19 @@ function TendApp() {
             }
           }}
           onCancel={() => setStatusProposal(null)}
+        />
+        <ConfirmationDialog
+          colors={colors}
+          title="Delete this activity?"
+          detail={deletionProposal ? `${entrySummary(deletionProposal, data)} on ${formatDate(deletionProposal.activityDate)} will be removed.` : ""}
+          confirmLabel="Confirm deletion"
+          visible={deletionProposal !== null}
+          onConfirm={() => {
+            if (deletionProposal && commitData((current) => deleteHabitEntry(current, deletionProposal.id))) {
+              setDeletionProposal(null);
+            }
+          }}
+          onCancel={() => setDeletionProposal(null)}
         />
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -547,7 +549,6 @@ function ReadyComposer({ colors, speechDetail, heard, onSpeak, onType }: ColorPr
         </>
       ) : (
         <>
-          <SectionLabel colors={colors}>Save an activity</SectionLabel>
           <Text style={[type.prompt, styles.center, { color: colors.primaryText }]}>What did you do?</Text>
         </>
       )}
@@ -722,26 +723,22 @@ function Acknowledgment({ colors, message }: ColorProps & { message: string }) {
   );
 }
 
-function HabitStatusConfirmation({ colors, proposal, onConfirm, onCancel }: ColorProps & {
-  proposal: HabitStatusProposal | null;
+function ConfirmationDialog({ colors, title, detail, confirmLabel, visible, onConfirm, onCancel }: ColorProps & {
+  title: string;
+  detail: string;
+  confirmLabel: string;
+  visible: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
-  if (!proposal) return null;
-  const archiving = proposal.action === "archive";
+  if (!visible) return null;
   return (
     <Modal transparent animationType="fade" visible onRequestClose={() => undefined}>
       <View accessibilityViewIsModal style={styles.modalBackdrop}>
         <View style={[styles.modalCard, { backgroundColor: colors.background, borderColor: colors.emphasis }]}>
-          <Text style={[type.heading, styles.center, { color: colors.primaryText }]}>
-            {archiving ? "Archive" : "Restore"} {proposal.habit.name}?
-          </Text>
-          <TextBlock colors={colors} style={styles.center}>
-            {archiving
-              ? "This Habit will leave Active Habits, but its Habit Entries will be kept."
-              : "This Habit will return to Active Habits and can be matched again."}
-          </TextBlock>
-          <Action colors={colors} onPress={onConfirm}>{archiving ? "Confirm archive" : "Confirm restore"}</Action>
+          <Text style={[type.heading, styles.center, { color: colors.primaryText }]}>{title}</Text>
+          <TextBlock colors={colors} style={styles.center}>{detail}</TextBlock>
+          <Action colors={colors} onPress={onConfirm}>{confirmLabel}</Action>
           <Action colors={colors} variant="retreat" onPress={onCancel}>Cancel</Action>
         </View>
       </View>
@@ -846,9 +843,9 @@ const styles = StyleSheet.create({
   loading: { flex: 1, alignItems: "center", justifyContent: "center" },
   content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 52, alignItems: "center", gap: spacing.md },
   header: { width: "100%", flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  trackHero: { width: "100%", gap: spacing.md },
+  trackHero: { width: "100%", alignItems: "center", gap: spacing.md },
   reflect: { minHeight: 44, borderWidth: 1, borderRadius: 999, alignItems: "center", justifyContent: "center", paddingHorizontal: 20, opacity: 0.68 },
-  composerSpace: { width: "100%", minHeight: 345, flexGrow: 1, justifyContent: "center" },
+  composerSpace: { width: "100%", minHeight: 345, flexGrow: 1, justifyContent: "center", paddingBottom: 180 },
   composer: { width: "100%", gap: spacing.sm },
   postSaveComposer: { width: "100%", gap: spacing.md },
   center: { textAlign: "center" },

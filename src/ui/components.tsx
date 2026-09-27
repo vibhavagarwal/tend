@@ -93,7 +93,7 @@ export function TextBlock({ children, colors, style }: PropsWithChildren<{ color
 
 const styles = StyleSheet.create({
   mark: { width: 40, height: 40, borderRadius: 11, overflow: "hidden" },
-  wordmark: { width: 156, height: 45, marginTop: 14 },
+  wordmark: { width: 200, height: 58, marginTop: 14 },
   action: { alignItems: "center", justifyContent: "center", borderRadius: 999, paddingHorizontal: 22 },
   inlineSection: { width: "100%", borderTopWidth: 1, paddingTop: spacing.md, gap: spacing.sm },
   rule: { width: 56, height: 1, alignSelf: "center", marginVertical: spacing.md },
