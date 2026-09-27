@@ -10,36 +10,20 @@ the initial screen quiet, asks for confirmation before meaningful changes,
 and makes recent activity available by scrolling rather than demanding
 attention.
 
-## What to look at first
+## Snapshots
 
-### Two-minute device demo
+<p align="center">
+  <img src="assets/portfolio/track-screen.png" width="280" alt="Tend's quiet, light-only Track screen with one centered capture prompt">
+  <img src="assets/portfolio/typed-statement.png" width="280" alt="Tend's typed Habit Statement capture state">
+</p>
 
-Tend is designed for a physical Android device rather than a browser demo.
-The quickest way to evaluate it is this short walkthrough:
+- **Track:** one focused prompt; recent activity begins below the initial
+  viewport.
+- **Capture:** plain-language input is reviewed before Tend creates a Habit or
+  saves an entry.
 
-1. Open Tend: the light-only Track screen shows the Tend wordmark and one
-   centered prompt, **What did you do?** Recent activity is below the initial
-   viewport.
-2. Type `I want to track meditation`, review the proposed Habit, and confirm.
-   The success message is centered, non-blocking, and clears after six seconds.
-3. Type `I meditated for 10 minutes today`, review the Habit Entry, and confirm
-   it. Tend records the entry only after that confirmation.
-4. Archive the Habit. The centered dialog blocks the rest of the screen until
-   you confirm or cancel; history is retained.
-5. Open **Reflect** to see weekly and all-time counts, one Habit per line.
-
-For a local release APK with embedded JavaScript (no Metro connection needed):
-
-```powershell
-cd android
-$env:NODE_ENV = "production"
-.\gradlew.bat assembleRelease
-```
-
-The generated APK is at
-`android/app/build/outputs/apk/release/app-release.apk`. It is intentionally
-not committed to Git; a release artifact or device recording is the appropriate
-attachment for a formal demo or interview packet.
+These are clean Pixel device captures. The sample statement is illustrative and
+was not saved while creating the screenshots.
 
 ## Product decisions
 
@@ -107,6 +91,18 @@ npm run typecheck
 npx expo-doctor
 npm run export:android
 ```
+
+### Build a release APK
+
+```powershell
+cd android
+$env:NODE_ENV = "production"
+.\gradlew.bat assembleRelease
+```
+
+The release APK has embedded JavaScript and is written to
+`android/app/build/outputs/apk/release/app-release.apk`. It is intentionally
+not committed to Git.
 
 If `app.json` changes, regenerate the ignored Android project before a native
 build:
