@@ -15,12 +15,15 @@ attention.
 <p align="center">
   <img src="assets/portfolio/track-screen.png" width="280" alt="Tend's quiet, light-only Track screen with one centered capture prompt">
   <img src="assets/portfolio/typed-statement.png" width="280" alt="Tend's typed Habit Statement capture state">
+  <img src="assets/portfolio/reflect-screen.png" width="280" alt="Tend's Reflect tab showing weekly and all-time counts by Habit">
 </p>
 
 - **Track:** one focused prompt; recent activity begins below the initial
   viewport.
 - **Capture:** plain-language input is reviewed before Tend creates a Habit or
   saves an entry.
+- **Reflect:** weekly and all-time activity counts are separated by Habit, one
+  line at a time.
 
 These are clean Pixel device captures. The sample statement is illustrative and
 was not saved while creating the screenshots.
