@@ -15,6 +15,22 @@ const defaultId = () =>
   globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 const normalize = (value: string) => value.trim().toLocaleLowerCase();
 
+/**
+ * Validates an ISO calendar date without allowing JavaScript's Date constructor
+ * to normalize overflow (for example, 2026-13-01 into the following January).
+ */
+export function isRealLocalCalendarDate(value: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return false;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (month < 1 || month > 12 || day < 1) return false;
+  const leapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const daysInMonth = [31, leapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1]!;
+  return day <= daysInMonth;
+}
+
 export const activeHabits = (data: TendData) => data.habits.filter((habit) => habit.archivedAt === null);
 export const archivedHabits = (data: TendData) => data.habits.filter((habit) => habit.archivedAt !== null);
 
@@ -77,8 +93,8 @@ export function validateEntryProposal(data: TendData, proposal: Extract<Interpre
   if (proposal.durationMinutes !== null && proposal.durationMinutes <= 0) {
     throw new Error("Habit Entry duration must be positive when supplied.");
   }
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(proposal.activityDate) || Number.isNaN(Date.parse(`${proposal.activityDate}T12:00:00`))) {
-    throw new Error("Habit Entry Activity Date must be a valid date.");
+  if (!isRealLocalCalendarDate(proposal.activityDate)) {
+    throw new Error("Habit Entry Activity Date must be a real local date in YYYY-MM-DD form.");
   }
   if ((proposal.quantityAmount === null) !== (proposal.quantityUnit === null)) {
     throw new Error("Habit Entry quantity and unit must be supplied together.");

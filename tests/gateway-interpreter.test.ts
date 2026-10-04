@@ -50,15 +50,14 @@ describe("optional interpretation gateway", () => {
     });
     const fetchImpl = fetchMock as unknown as typeof fetch;
 
-    await expect(interpretHabitStatement("I meditated", context, {
+    await expect(interpretHabitStatement("I completed a mindful sit", context, {
       baseUrl: "https://tend.example",
-      token: "test-token",
       fetchImpl,
       retryDelayMs: 0,
     })).resolves.toMatchObject({ type: "logHabitEntry", habitName: "Meditation", durationMinutes: 20 });
 
     expect(fetchMock).toHaveBeenCalledOnce();
-    expect((capturedInit?.headers as Record<string, string>).authorization).toBe("Bearer test-token");
+    expect(capturedInit?.headers).toEqual({ "content-type": "application/json" });
   });
 
   it("retries transient gateway failures and reports waking progress", async () => {
@@ -71,7 +70,7 @@ describe("optional interpretation gateway", () => {
     }) as unknown as typeof fetch;
     const onWaking = vi.fn();
 
-    await expect(interpretHabitStatement("I walked today", context, {
+    await expect(interpretHabitStatement("I took a neighborhood walk", context, {
       baseUrl: "https://tend.example",
       fetchImpl,
       onWaking,
@@ -90,5 +89,33 @@ describe("optional interpretation gateway", () => {
       quantity_unit: null,
       activity_date: "2026-09-16",
     }, context.activeHabitNames)).toThrow("Active Habit");
+  });
+
+  it("keeps a locally understood ambiguous statement on-device for clarification", async () => {
+    const fetchImpl = vi.fn(async () => new Response(JSON.stringify({
+      type: "clarify_habit_entry",
+      candidate_habit_names: ["Meditation", "Reading"],
+      duration_minutes: null,
+      quantity_amount: null,
+      quantity_unit: null,
+      activity_date: "2026-09-16",
+    }), { status: 200 })) as unknown as typeof fetch;
+
+    await expect(interpretHabitStatement("I read today", {
+      ...context,
+      activeHabitNames: ["Reading", "Read poetry"],
+    }, {
+      baseUrl: "https://tend.example",
+      fetchImpl,
+      retryDelayMs: 0,
+    })).resolves.toMatchObject({ type: "clarifyHabitEntry", candidateHabitNames: ["Reading", "Read poetry"] });
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it("rejects an overflow gateway Activity Date instead of allowing Date normalization", () => {
+    expect(() => parseGatewayProposal({
+      type: "log_habit_entry", habit_name: "Meditation", duration_minutes: null,
+      quantity_amount: null, quantity_unit: null, activity_date: "2026-13-01",
+    }, context.activeHabitNames)).toThrow("valid Activity Date");
   });
 });

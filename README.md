@@ -63,10 +63,13 @@ source folders as rollback points.
 
 ## Interpretation architecture
 
-The current default runtime uses Tend's deterministic local interpreter. The
-application contains an optional client for a separately hosted interpretation
-gateway, but no OpenAI secret belongs in the mobile app and model-backed
-interpretation is not enabled in the V1 acceptance candidate.
+The default runtime uses Tend's deterministic local interpreter. When
+`EXPO_PUBLIC_TEND_INTERPRETATION_GATEWAY_URL` is configured at build time,
+statements the local interpreter cannot understand or match are sent to that separately hosted
+interpretation gateway. The app never sends an OpenAI API key, gateway bearer
+token, or other durable secret; the gateway must keep any OpenAI credential in
+its own server-side secret store and expose only the `POST /interpret` contract
+used by `src/domain/interpreter.ts`.
 
 Regardless of interpreter, structured proposals are validated by the
 application and require explicit confirmation before local data changes.

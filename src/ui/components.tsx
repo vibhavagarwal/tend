@@ -33,6 +33,54 @@ export function Wordmark({ subdued = false, colors }: { subdued?: boolean; color
   );
 }
 
+type IconActionProps = {
+  accessibilityLabel: string;
+  colors: Colors;
+  icon: "archive" | "delete";
+  onPress: () => void;
+};
+
+export function IconAction({ accessibilityLabel, colors, icon, onPress }: IconActionProps) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <Pressable
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="button"
+      hitSlop={6}
+      onBlur={() => setFocused(false)}
+      onFocus={() => setFocused(true)}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.iconAction,
+        focused && { borderColor: colors.primaryText },
+        pressed && { opacity: 0.72 },
+      ]}
+    >
+      <Svg accessibilityElementsHidden width={20} height={20} viewBox="0 0 24 24">
+        {icon === "delete" ? (
+          <Path
+            d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7m4 4v5m4-5v5"
+            fill="none"
+            stroke={colors.mutedText}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.8}
+          />
+        ) : (
+          <Path
+            d="M4 5h16v4H4V5Zm2 4v11h12V9m-8 4h4"
+            fill="none"
+            stroke={colors.mutedText}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.8}
+          />
+        )}
+      </Svg>
+    </Pressable>
+  );
+}
+
 type ActionProps = {
   children: ReactNode;
   onPress: () => void;
@@ -93,7 +141,8 @@ export function TextBlock({ children, colors, style }: PropsWithChildren<{ color
 
 const styles = StyleSheet.create({
   mark: { width: 40, height: 40, borderRadius: 11, overflow: "hidden" },
-  wordmark: { width: 156, height: 45, marginTop: 14 },
+  wordmark: { width: 261, height: 75, marginTop: 14 },
+  iconAction: { width: 44, height: 44, borderRadius: 22, borderWidth: 2, borderColor: "transparent", alignItems: "center", justifyContent: "center" },
   action: { alignItems: "center", justifyContent: "center", borderRadius: 999, paddingHorizontal: 22 },
   inlineSection: { width: "100%", borderTopWidth: 1, paddingTop: spacing.md, gap: spacing.sm },
   rule: { width: 56, height: 1, alignSelf: "center", marginVertical: spacing.md },

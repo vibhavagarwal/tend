@@ -77,6 +77,25 @@ describe("Tend domain and Entry Safety", () => {
     expect(() => validateEntryProposal(data, {
       type: "logHabitEntry", habitName: "Meditation", durationMinutes: null,
       activityDate: "not-a-date", quantityAmount: null, quantityUnit: null,
-    })).toThrow("valid date");
+    })).toThrow("real local date");
+  });
+
+  it.each(["2026-13-01", "2026-00-01", "2026-02-29", "2025-04-31", "2026-01-00"]) (
+    "rejects the non-existent Activity Date %s without normalizing it",
+    (activityDate) => {
+      const data = createHabit(emptyTendData(), "Meditation", services);
+      expect(() => validateEntryProposal(data, {
+        type: "logHabitEntry", habitName: "Meditation", durationMinutes: null,
+        activityDate, quantityAmount: null, quantityUnit: null,
+      })).toThrow("real local date");
+    },
+  );
+
+  it.each(["2024-02-29", "2026-12-31", "2026-04-30"]) ("accepts the real Activity Date %s", (activityDate) => {
+    const data = createHabit(emptyTendData(), "Meditation", services);
+    expect(validateEntryProposal(data, {
+      type: "logHabitEntry", habitName: "Meditation", durationMinutes: null,
+      activityDate, quantityAmount: null, quantityUnit: null,
+    }).activityDate).toBe(activityDate);
   });
 });

@@ -1,4 +1,5 @@
 import { interpretStatement } from "./interpretation";
+import { isRealLocalCalendarDate } from "./tend";
 import { InterpretationProposal } from "./types";
 
 type InterpretationContext = {
@@ -10,7 +11,6 @@ type InterpretationContext = {
 
 type GatewayOptions = {
   baseUrl?: string;
-  token?: string;
   fetchImpl?: typeof fetch;
   onWaking?: () => void;
   retryDelayMs?: number;
@@ -19,7 +19,6 @@ type GatewayOptions = {
 type GatewayJson = Record<string, unknown>;
 
 const configuredBaseUrl = process.env.EXPO_PUBLIC_TEND_INTERPRETATION_GATEWAY_URL?.trim();
-const configuredToken = process.env.EXPO_PUBLIC_TEND_GATEWAY_TOKEN?.trim();
 
 export async function interpretHabitStatement(
   statement: string,
@@ -38,14 +37,12 @@ export async function interpretHabitStatement(
   }
 
   const fetchImpl = options.fetchImpl ?? fetch;
-  const token = options.token ?? configuredToken;
   const response = await requestWithRetry(
     `${baseUrl.replace(/\/$/, "")}/interpret`,
     {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        ...(token ? { authorization: `Bearer ${token}` } : {}),
       },
       body: JSON.stringify({
         statement,
@@ -165,7 +162,7 @@ function optionalQuantity(json: GatewayJson): { amount: number | null; unit: str
 }
 
 function requiredDate(value: unknown): string {
-  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+  if (typeof value !== "string" || !isRealLocalCalendarDate(value)) {
     throw new Error("The interpretation did not identify a valid Activity Date.");
   }
   return value;

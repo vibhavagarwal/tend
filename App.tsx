@@ -10,7 +10,6 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  useColorScheme,
   View,
 } from "react-native";
 import { useFonts } from "expo-font";
@@ -42,7 +41,7 @@ import {
 } from "./src/domain/types";
 import { loadTendData, saveTendData } from "./src/persistence";
 import { useTendSpeech } from "./src/voice/useTendSpeech";
-import { Action, InlineSection, Rule, SectionLabel, TendMark, TextBlock, Wordmark } from "./src/ui/components";
+import { Action, IconAction, InlineSection, Rule, SectionLabel, TendMark, TextBlock, Wordmark } from "./src/ui/components";
 import { palette, spacing, type } from "./src/ui/theme";
 
 type HabitStatusProposal = { habit: Habit; action: "archive" | "restore"; fromStatement?: boolean };
@@ -66,8 +65,7 @@ export default function App() {
 }
 
 function TendApp() {
-  const scheme = useColorScheme();
-  const colors = palette(scheme);
+  const colors = palette("light");
   const [fontsLoaded] = useFonts({
     EBGaramond: require("./assets/eb-garamond.ttf"),
     EBGaramondItalic: require("./assets/eb-garamond-italic.ttf"),
@@ -331,12 +329,19 @@ function TendApp() {
     applyProposal(selected, data);
   };
 
-  const updateEntryReview = (entry: Omit<ValidatedHabitEntry, "habitId">) => {
+  const updateEntryReview = (entry: Omit<ValidatedHabitEntry, "habitId">): string | null => {
     const next: InterpretationProposal = {
       type: "logHabitEntry", habitName: entry.habitName, durationMinutes: entry.durationMinutes,
       activityDate: entry.activityDate, quantityAmount: entry.quantityAmount, quantityUnit: entry.quantityUnit,
     };
-    applyProposal(next, data);
+    try {
+      setProposal(null);
+      setValidatedEntry(validateEntryProposal(data, next));
+      setDuplicate(null);
+      return null;
+    } catch (error) {
+      return error instanceof Error ? error.message : "Habit Entry corrections could not be validated.";
+    }
   };
 
   const discardReviewedPending = () => {
@@ -385,7 +390,7 @@ function TendApp() {
 
   return (
     <SafeAreaView edges={["top", "right", "bottom", "left"]} style={[styles.safe, { backgroundColor: colors.background }]}>
-      <StatusBar style={colors.dark ? "light" : "dark"} />
+      <StatusBar style="dark" />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.flex}>
         <ScrollView
           ref={trackScrollRef}
@@ -546,12 +551,9 @@ function ReadyComposer({ colors, speechDetail, heard, onSpeak, onType }: ColorPr
           <Text style={[type.transcript, styles.center, { color: colors.primaryText }]}>“{heard}”</Text>
         </>
       ) : (
-        <>
-          <SectionLabel colors={colors}>Save an activity</SectionLabel>
-          <Text style={[type.prompt, styles.center, { color: colors.primaryText }]}>What did you do?</Text>
-        </>
+          <Text style={[type.prompt, styles.center, { color: colors.primaryText }]}>What do you want to log?</Text>
       )}
-      <Action colors={colors} onPress={onSpeak}>Hold to speak</Action>
+      <Action colors={colors} onPress={onSpeak}>Press to speak</Action>
       <Action colors={colors} variant="tertiary" onPress={onType}>Type instead</Action>
       {speechDetail !== "Ready. Nothing is submitted or saved." ? (
         <Text accessibilityLiveRegion="polite" style={[type.metadata, styles.center, { color: colors.mutedText }]}>{speechDetail}</Text>
@@ -602,7 +604,7 @@ function TypedComposer({ colors, statement, setStatement, onSubmit, onSpeak, isI
         multiline
         onChangeText={setStatement}
         onSubmitEditing={onSubmit}
-        placeholder={showCreationHint ? "Try ‘I want to track meditation.’" : "I meditated for 10 minutes today"}
+        placeholder={showCreationHint ? "Try ‘I want to track meditation.’" : "I meditated today"}
         placeholderTextColor={colors.mutedText}
         returnKeyType="done"
         style={[styles.input, type.field, { borderBottomColor: colors.quietAccent, color: colors.primaryText }]}
@@ -622,7 +624,7 @@ function ReviewComposer({ colors, statement, proposal, validatedEntry, duplicate
   onConfirm: () => void;
   onChooseHabit: (name: string) => void;
   onEdit: () => void;
-  onUpdateEntry: (entry: Omit<ValidatedHabitEntry, "habitId">) => void;
+  onUpdateEntry: (entry: Omit<ValidatedHabitEntry, "habitId">) => string | null;
   onCancel: () => void;
 }) {
   const sourceDatePhrase = proposal && "sourceDatePhrase" in proposal ? proposal.sourceDatePhrase : undefined;
@@ -632,11 +634,20 @@ function ReviewComposer({ colors, statement, proposal, validatedEntry, duplicate
   const [duration, setDuration] = useState(validatedEntry?.durationMinutes?.toString() ?? "");
   const [quantity, setQuantity] = useState(validatedEntry?.quantityAmount?.toString() ?? "");
   const [unit, setUnit] = useState(validatedEntry?.quantityUnit ?? "");
+  const [editError, setEditError] = useState<string | null>(null);
+  useEffect(() => {
+    setHabitName(validatedEntry?.habitName ?? "");
+    setDate(validatedEntry?.activityDate ?? "");
+    setDuration(validatedEntry?.durationMinutes?.toString() ?? "");
+    setQuantity(validatedEntry?.quantityAmount?.toString() ?? "");
+    setUnit(validatedEntry?.quantityUnit ?? "");
+  }, [validatedEntry]);
   const applyEdits = () => {
     const durationMinutes = duration.trim() ? Number(duration) : null;
     const quantityAmount = quantity.trim() ? Number(quantity) : null;
-    onUpdateEntry({ habitName: habitName.trim(), activityDate: date.trim(), durationMinutes, quantityAmount, quantityUnit: quantityAmount === null ? null : unit.trim() || null });
-    setEditingEntry(false);
+    const error = onUpdateEntry({ habitName: habitName.trim(), activityDate: date.trim(), durationMinutes, quantityAmount, quantityUnit: quantityAmount === null ? null : unit.trim() || null });
+    setEditError(error);
+    if (!error) setEditingEntry(false);
   };
   return (
     <View style={styles.composer}>
@@ -678,7 +689,7 @@ function ReviewComposer({ colors, statement, proposal, validatedEntry, duplicate
           <Text style={[type.title, styles.center, { color: colors.primaryText }]}>Restore {validatedEntry.habitName} and save this entry?</Text>
           <TextBlock colors={colors} style={styles.center}>This Habit is archived. Confirming will restore it and save the activity together.</TextBlock>
           {duplicate ? <TextBlock colors={colors} style={styles.center}>A matching Habit Entry is already saved. Confirm to keep both entries.</TextBlock> : null}
-          {validatedEntry.durationMinutes !== null ? <TextBlock colors={colors}>Duration: {validatedEntry.durationMinutes} minutes</TextBlock> : null}
+          {validatedEntry.durationMinutes !== null ? <TextBlock colors={colors}>Duration: {validatedEntry.durationMinutes} mins</TextBlock> : null}
           {validatedEntry.quantityAmount !== null ? <TextBlock colors={colors}>Quantity: {displayQuantity(validatedEntry.quantityAmount)} {validatedEntry.quantityUnit}</TextBlock> : null}
           <TextBlock colors={colors}>Activity Date: {formatDate(validatedEntry.activityDate)}</TextBlock>
           {sourceDatePhrase ? <Text style={[type.metadata, { color: colors.mutedText }]}>Recognized date: “{sourceDatePhrase}”</Text> : null}
@@ -690,18 +701,21 @@ function ReviewComposer({ colors, statement, proposal, validatedEntry, duplicate
           <Text style={[type.title, styles.center, { color: colors.primaryText }]}>{duplicate ? "Possible duplicate Habit Entry" : "Habit Entry proposal"}</Text>
           {duplicate ? <TextBlock colors={colors} style={styles.center}>A matching Habit Entry is already saved. Save anyway to keep both entries.</TextBlock> : null}
           <TextBlock colors={colors}>Habit: {validatedEntry.habitName}</TextBlock>
-          {validatedEntry.durationMinutes !== null ? <TextBlock colors={colors}>Duration: {validatedEntry.durationMinutes} minutes</TextBlock> : null}
+          {validatedEntry.durationMinutes !== null ? <TextBlock colors={colors}>Duration: {validatedEntry.durationMinutes} mins</TextBlock> : null}
           {validatedEntry.quantityAmount !== null ? <TextBlock colors={colors}>Quantity: {displayQuantity(validatedEntry.quantityAmount)} {validatedEntry.quantityUnit}</TextBlock> : null}
           <TextBlock colors={colors}>Activity Date: {formatDate(validatedEntry.activityDate)}</TextBlock>
           {sourceDatePhrase ? <Text style={[type.metadata, { color: colors.mutedText }]}>Recognized date: “{sourceDatePhrase}”</Text> : null}
           <TextBlock colors={colors}>Review this interpretation before saving.</TextBlock>
           <Action colors={colors} onPress={onConfirm}>{duplicate ? "Save anyway" : "Save Habit Entry"}</Action>
           {!editingEntry ? <Action colors={colors} variant="tertiary" onPress={() => setEditingEntry(true)}>Edit entry details</Action> : <View style={styles.editFields}>
-            <TextInput accessibilityLabel="Habit name" value={habitName} onChangeText={setHabitName} style={[styles.fieldInput, type.field, { color: colors.primaryText, borderBottomColor: colors.quietAccent }]} />
-            <TextInput accessibilityLabel="Activity Date in YYYY-MM-DD" value={date} onChangeText={setDate} style={[styles.fieldInput, type.field, { color: colors.primaryText, borderBottomColor: colors.quietAccent }]} />
-            <TextInput accessibilityLabel="Duration in minutes, optional" value={duration} onChangeText={setDuration} keyboardType="numeric" style={[styles.fieldInput, type.field, { color: colors.primaryText, borderBottomColor: colors.quietAccent }]} />
-            <TextInput accessibilityLabel="Quantity, optional" value={quantity} onChangeText={setQuantity} keyboardType="numeric" style={[styles.fieldInput, type.field, { color: colors.primaryText, borderBottomColor: colors.quietAccent }]} />
-            {quantity.trim() ? <TextInput accessibilityLabel="Quantity unit" value={unit} onChangeText={setUnit} style={[styles.fieldInput, type.field, { color: colors.primaryText, borderBottomColor: colors.quietAccent }]} /> : null}
+            <EditableField colors={colors} label="habit" accessibilityLabel="Habit name" value={habitName} onChangeText={setHabitName} />
+            {validatedEntry.durationMinutes !== null ? <EditableField colors={colors} label="duration (mins)" accessibilityLabel="Duration in minutes" value={duration} onChangeText={setDuration} keyboardType="numeric" /> : null}
+            {validatedEntry.quantityAmount !== null ? <>
+              <EditableField colors={colors} label="quantity" accessibilityLabel="Quantity" value={quantity} onChangeText={setQuantity} keyboardType="numeric" />
+              <EditableField colors={colors} label="unit" accessibilityLabel="Quantity unit" value={unit} onChangeText={setUnit} />
+            </> : null}
+            <EditableField colors={colors} label="date" accessibilityLabel="Activity Date in YYYY-MM-DD" value={date} onChangeText={setDate} />
+            {editError ? <Text accessibilityLiveRegion="polite" style={[type.body, { color: colors.error }]}>{editError}</Text> : null}
             <Action colors={colors} variant="secondary" onPress={applyEdits}>Apply corrections</Action>
           </View>}
         </>
@@ -710,6 +724,21 @@ function ReviewComposer({ colors, statement, proposal, validatedEntry, duplicate
         <Action colors={colors} variant="tertiary" style={styles.flex} onPress={onEdit}>Edit statement</Action>
         <Action colors={colors} variant="retreat" style={styles.flex} onPress={onCancel}>Cancel</Action>
       </View>
+    </View>
+  );
+}
+
+function EditableField({ colors, label, ...inputProps }: ColorProps & {
+  label: string;
+  accessibilityLabel: string;
+  value: string;
+  onChangeText: (value: string) => void;
+  keyboardType?: "numeric";
+}) {
+  return (
+    <View style={[styles.editFieldRow, { borderBottomColor: colors.emphasis }]}>
+      <TextInput {...inputProps} style={[styles.fieldInput, type.field, { color: colors.primaryText }]} />
+      <Text style={[type.metadata, styles.editFieldLabel, { color: colors.mutedText }]}>{label}</Text>
     </View>
   );
 }
@@ -756,7 +785,7 @@ function ReflectScreen({ colors, data, onBack }: ColorProps & { data: TendData; 
   const rangeLabel = `${formatDate(range.start)} – ${formatDate(range.end)}`;
   return (
     <SafeAreaView edges={["top", "right", "bottom", "left"]} style={[styles.safe, { backgroundColor: colors.background }]}>
-      <StatusBar style={colors.dark ? "light" : "dark"} />
+      <StatusBar style="dark" />
       <ScrollView contentContainerStyle={styles.content} accessibilityLabel="Tend Reflect">
         <View style={styles.header}>
           <Action colors={colors} variant="secondary" onPress={onBack}>Back</Action>
@@ -795,7 +824,7 @@ function History({ colors, data, onDelete }: ColorProps & { data: TendData; onDe
             <Text style={[type.list, { color: colors.primaryText }]}>{entrySummary(entry, data)}</Text>
             <Text style={[type.metadata, { color: colors.mutedText }]}>{formatDate(entry.activityDate)}</Text>
           </View>
-          <Action colors={colors} variant="retreat" onPress={() => onDelete(entry)} accessibilityLabel={`Delete ${entrySummary(entry, data)}`}>Delete</Action>
+            <IconAction colors={colors} icon="delete" onPress={() => onDelete(entry)} accessibilityLabel={`Delete ${entrySummary(entry, data)}`} />
         </View>
       ))}
     </View>
@@ -814,7 +843,7 @@ function HabitManagement({ colors, active, archived, onArchive, onRestore }: Col
       {active.length === 0 ? <Text style={[type.body, styles.center, { color: colors.mutedText }]}>No Active Habits yet.</Text> : active.map((habit) => (
         <View key={habit.id} style={styles.row}>
           <Text style={[type.list, styles.flex, { color: colors.primaryText }]}>{habit.name}</Text>
-          <Action colors={colors} variant="retreat" onPress={() => onArchive(habit)} accessibilityLabel={`Archive ${habit.name}`}>Archive</Action>
+            <IconAction colors={colors} icon="archive" onPress={() => onArchive(habit)} accessibilityLabel={`Archive ${habit.name}`} />
         </View>
       ))}
       {archived.length > 0 ? (
@@ -835,7 +864,7 @@ function HabitManagement({ colors, active, archived, onArchive, onRestore }: Col
 
 function entrySummary(entry: HabitEntry, data: TendData): string {
   const habitName = data.habits.find((habit) => habit.id === entry.habitId)?.name ?? "Habit";
-  if (entry.durationMinutes !== null) return `${habitName} — ${entry.durationMinutes} minutes`;
+  if (entry.durationMinutes !== null) return `${habitName} — ${entry.durationMinutes} mins`;
   if (entry.quantityAmount !== null) return `${habitName} — ${displayQuantity(entry.quantityAmount)} ${entry.quantityUnit}`;
   return habitName;
 }
@@ -853,8 +882,10 @@ const styles = StyleSheet.create({
   postSaveComposer: { width: "100%", gap: spacing.md },
   center: { textAlign: "center" },
   input: { minHeight: 92, maxHeight: 190, borderBottomWidth: 1, textAlignVertical: "top", paddingHorizontal: 4, paddingVertical: 12 },
-  fieldInput: { minHeight: 44, borderBottomWidth: 1, paddingHorizontal: 4, paddingVertical: 8 },
+  fieldInput: { minHeight: 56, flex: 1, paddingHorizontal: 4, paddingVertical: 8 },
   editFields: { width: "100%", gap: spacing.xs },
+  editFieldRow: { width: "100%", minHeight: 56, flexDirection: "row", alignItems: "center", borderBottomWidth: 1 },
+  editFieldLabel: { paddingLeft: spacing.sm, textTransform: "lowercase" },
   message: { width: "100%", textAlign: "center" },
   levels: { height: 40, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
   level: { width: 3, borderRadius: 2 },

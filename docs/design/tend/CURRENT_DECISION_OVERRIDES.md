@@ -7,6 +7,6 @@ records.
 
 - Tend is mandatory light mode. This supersedes the earlier requirement to
   follow the device's light or dark setting.
-- A post-save acknowledgment has a maximum duration of three seconds. This
+- A post-save acknowledgment has a maximum duration of six seconds. This
   supersedes the earlier requirement that it remain visible until the person's
   next action.
