@@ -1,32 +1,14 @@
-# Tend
+# Neev
 
-Tend is a calm, local-first Android habit tracker for people who want to record
+Neev is a calm, local-first Android habit tracker for people who want to record
 what happened without turning reflection into another task. Speak or type a
-plain-language Habit Statement, review Tend's interpretation, and explicitly
+plain-language Habit Statement, review Neev's interpretation, and explicitly
 confirm before anything is saved.
 
 The result is an Android experience built around deliberate capture: it keeps
 the initial screen quiet, asks for confirmation before meaningful changes,
 and makes recent activity available by scrolling rather than demanding
 attention.
-
-## Snapshots
-
-<p align="center">
-  <img src="assets/portfolio/track-screen.png" width="280" alt="Tend's quiet, light-only Track screen with one centered capture prompt">
-  <img src="assets/portfolio/typed-statement.png" width="280" alt="Tend's typed Habit Statement capture state">
-  <img src="assets/portfolio/reflect-screen.png" width="280" alt="Tend's Reflect tab showing weekly and all-time counts by Habit">
-</p>
-
-- **Track:** one focused prompt; recent activity begins below the initial
-  viewport.
-- **Capture:** plain-language input is reviewed before Tend creates a Habit or
-  saves an entry.
-- **Reflect:** weekly and all-time activity counts are separated by Habit, one
-  line at a time.
-
-These are clean Pixel device captures. The sample statement is illustrative and
-was not saved while creating the screenshots.
 
 ## Product decisions
 
@@ -56,10 +38,10 @@ was not saved while creating the screenshots.
 
 ## Privacy and data behavior
 
-V1 is local-only: Tend stores Habits, entries, pending statements, and its
+V1 is local-only: Neev stores Habits, entries, pending statements, and its
 acknowledgment cursor on the device. It has no accounts, analytics, cloud sync,
 or configured hosted interpretation gateway. The app itself does not send Habit
-data to a Tend server.
+data to a Neev server.
 
 Voice capture uses the Android speech-recognition service selected on the
 device. That service's handling of microphone audio is governed by its own
@@ -119,7 +101,7 @@ Git.
 
 ## Current limitations and roadmap
 
-Tend is intentionally narrow today:
+Neev is intentionally narrow today:
 
 - Android is the accepted platform; iOS has not received equivalent device
   acceptance.
@@ -135,7 +117,7 @@ interpretation service.
 
 ## How this project was built
 
-I provided Tend's product direction, scope decisions, acceptance criteria, and
+I provided Neev's product direction, scope decisions, acceptance criteria, and
 final judgment. AI coding agents assisted with implementation under that
 direction; I do not claim to have personally authored every line of code.
 
@@ -148,9 +130,9 @@ AI-assisted implementation.
 
 ## Attribution and license
 
-The Tend wordmark and app icon are original project assets. Typography assets
+The Neev wordmark and app icon are original project assets. Typography assets
 include EB Garamond, Karla, and IBM Plex Mono, each distributed under the SIL
-Open Font License 1.1. Tend does not include external datasets.
+Open Font License 1.1. Neev does not include external datasets.
 
 **Code license: all rights reserved.** This repository is shared for evaluation
 and portfolio review; no license to use, copy, modify, or distribute the code
