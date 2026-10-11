@@ -783,24 +783,35 @@ function ReflectScreen({ colors, data, onBack }: ColorProps & { data: TendData; 
   const weekly = reflectionCounts(data, range);
   const total = reflectionCounts(data);
   const rangeLabel = `${formatDate(range.start)} – ${formatDate(range.end)}`;
+  const reflectColors = { ...colors, background: colors.dark ? "#0B1211" : "#DCE5E1" };
   return (
-    <SafeAreaView edges={["top", "right", "bottom", "left"]} style={[styles.safe, { backgroundColor: colors.background }]}>
+    <SafeAreaView edges={["top", "right", "bottom", "left"]} style={[styles.safe, { backgroundColor: reflectColors.background }]}>
       <StatusBar style="dark" />
       <ScrollView contentContainerStyle={styles.content} accessibilityLabel="Tend Reflect">
         <View style={styles.header}>
-          <Action colors={colors} variant="secondary" onPress={onBack}>Back</Action>
-          <Text style={[type.heading, { color: colors.primaryText }]}>Reflect</Text>
-        </View>
-        {total.length === 0 ? <Text style={[type.prompt, styles.center, { color: colors.primaryText }]}>No activity saved yet. When you save an activity, it will appear here.</Text> : <>
-          <View style={styles.section}>
-            <SectionLabel colors={colors}>This week</SectionLabel>
-            <Text style={[type.metadata, styles.center, { color: colors.mutedText }]}>{rangeLabel}</Text>
-            {weekly.length === 0 ? <TextBlock colors={colors} style={styles.center}>No activity was saved this week.</TextBlock> : <ReflectionCounts colors={colors} items={weekly} />}
+          <Pressable
+            accessibilityHint="Return to activity capture"
+            accessibilityLabel="Back to Track"
+            accessibilityRole="button"
+            onPress={onBack}
+            style={({ pressed }) => [styles.markBack, pressed && { opacity: 0.72 }]}
+          >
+            <NeevMark />
+          </Pressable>
+          <View style={[styles.reflect, { borderColor: reflectColors.hairline }]}>
+            <Text style={[type.tertiary, { color: reflectColors.mutedText }]}>Reflect</Text>
           </View>
-          <Rule colors={colors} />
+        </View>
+        {total.length === 0 ? <Text style={[type.prompt, styles.center, { color: reflectColors.primaryText }]}>No activity saved yet. When you save an activity, it will appear here.</Text> : <>
           <View style={styles.section}>
-            <SectionLabel colors={colors}>In total</SectionLabel>
-            <ReflectionCounts colors={colors} items={total} />
+            <SectionLabel colors={reflectColors}>This week</SectionLabel>
+            <Text style={[type.metadata, styles.center, { color: reflectColors.mutedText }]}>{rangeLabel}</Text>
+            {weekly.length === 0 ? <TextBlock colors={reflectColors} style={styles.center}>No activity was saved this week.</TextBlock> : <ReflectionCounts colors={reflectColors} items={weekly} />}
+          </View>
+          <Rule colors={reflectColors} />
+          <View style={styles.section}>
+            <SectionLabel colors={reflectColors}>In total</SectionLabel>
+            <ReflectionCounts colors={reflectColors} items={total} />
           </View>
         </>}
       </ScrollView>
@@ -877,7 +888,8 @@ const styles = StyleSheet.create({
   header: { width: "100%", flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   trackHero: { width: "100%", gap: spacing.md },
   reflect: { minHeight: 44, borderWidth: 1, borderRadius: 999, alignItems: "center", justifyContent: "center", paddingHorizontal: 20, opacity: 0.68 },
-  composerSpace: { width: "100%", minHeight: 345, flexGrow: 1, justifyContent: "center" },
+  markBack: { borderRadius: 11 },
+  composerSpace: { width: "100%", minHeight: 345, flexGrow: 1, justifyContent: "center", paddingBottom: 72 },
   composer: { width: "100%", gap: spacing.sm },
   postSaveComposer: { width: "100%", gap: spacing.md },
   center: { textAlign: "center" },

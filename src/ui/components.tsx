@@ -130,7 +130,7 @@ export function TextBlock({ children, colors, style }: PropsWithChildren<{ color
 
 const styles = StyleSheet.create({
   mark: { width: 40, height: 40, borderRadius: 11, overflow: "hidden" },
-  wordmark: { alignSelf: "center", fontFamily: font.expressiveItalic, fontSize: 52, lineHeight: 62, marginTop: 14 },
+  wordmark: { alignSelf: "center", fontFamily: font.expressiveItalic, fontSize: 64, lineHeight: 74, marginTop: 16 },
   iconAction: { width: 44, height: 44, borderRadius: 22, borderWidth: 2, borderColor: "transparent", alignItems: "center", justifyContent: "center" },
   action: { alignItems: "center", justifyContent: "center", borderRadius: 999, paddingHorizontal: 22 },
   inlineSection: { width: "100%", borderTopWidth: 1, paddingTop: spacing.md, gap: spacing.sm },
