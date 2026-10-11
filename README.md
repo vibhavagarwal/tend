@@ -1,15 +1,15 @@
-# Tend
+# Neev
 
-Tend is a calm, voice-first Android habit tracker. Habit Statements can be
+Neev is a calm, voice-first Android habit tracker. Habit Statements can be
 spoken or typed, but every meaningful change is reviewed and explicitly
 confirmed before it is saved. V1 data remains on the device.
 
 See [the documentation guide](docs/README.md) for the authoritative product,
-domain, decision, and approved Tend design references.
+domain, decision, and approved Neev design references.
 
 ## Windows Android development
 
-The canonical Tend checkout is `C:\dev\tend`. Keep it at this short path:
+The canonical Neev checkout is `C:\dev\tend`. Keep it at this short path:
 React Native CMake object paths can exceed the Windows 260-character limit in
 a deeply nested workspace. `android/`, `.expo/`, `dist/`, and `node_modules/`
 are generated and intentionally ignored; source history lives in Git.
@@ -43,6 +43,21 @@ npm run android:build              # produces android\app\build\outputs\apk\debu
 npm run android:install            # installs/updates the connected Pixel and verifies the package
 ```
 
+### Fast device-preview loop
+
+Do not make a new Android release build for ordinary TypeScript, layout, copy,
+or asset edits. Install a debug/development build once, then run:
+
+```powershell
+npm run android:preview
+```
+
+This forwards Metro to the connected device and starts Expo's development
+server. Changes refresh in the installed development build without Gradle. Use
+`android:prepare` and a new native build only when `app.json`, native Expo
+plugins, or native dependencies change. Build a release APK only for final
+delivery or a release-specific verification.
+
 `npm run preflight` fails with an actionable message if the repository is
 dirty, the path is too long, dependencies are absent, the JDK/SDK/ADB/device
 is unavailable, or Gradle cannot load the generated Android project. It does
@@ -63,7 +78,7 @@ source folders as rollback points.
 
 ## Interpretation architecture
 
-The default runtime uses Tend's deterministic local interpreter. When
+The default runtime uses Neev's deterministic local interpreter. When
 `EXPO_PUBLIC_TEND_INTERPRETATION_GATEWAY_URL` is configured at build time,
 statements the local interpreter cannot understand or match are sent to that separately hosted
 interpretation gateway. The app never sends an OpenAI API key, gateway bearer

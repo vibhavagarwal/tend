@@ -41,7 +41,7 @@ import {
 } from "./src/domain/types";
 import { loadTendData, saveTendData } from "./src/persistence";
 import { useTendSpeech } from "./src/voice/useTendSpeech";
-import { Action, IconAction, InlineSection, Rule, SectionLabel, TendMark, TextBlock, Wordmark } from "./src/ui/components";
+import { Action, IconAction, InlineSection, NeevMark, Rule, SectionLabel, TextBlock, Wordmark } from "./src/ui/components";
 import { palette, spacing, type } from "./src/ui/theme";
 
 type HabitStatusProposal = { habit: Habit; action: "archive" | "restore"; fromStatement?: boolean };
@@ -401,7 +401,7 @@ function TendApp() {
         >
           <View style={[styles.trackHero, trackViewportHeight > 0 ? { minHeight: trackViewportHeight } : undefined]}>
             <View style={styles.header}>
-              <TendMark />
+              <NeevMark />
               <Pressable
                 accessibilityHint="Open your saved activity reflection"
                 accessibilityRole="button"

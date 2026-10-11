@@ -5,31 +5,20 @@ import { font, spacing, type } from "./theme";
 
 export type Colors = ReturnType<typeof import("./theme").palette>;
 
-export function TendMark() {
+export function NeevMark() {
   return (
-    <View accessibilityLabel="Tend app icon" style={styles.mark}>
-      <Svg width={40} height={40} viewBox="0 0 108 108">
-        <Path fill="#006B5F" d="M0 0h108v108H0z" />
-        <Path fill="#fff" d="M50 79h8V49h-8zm4-29C37 50 27 40 27 23c17 0 27 10 27 27zm0 12c0-17 10-27 27-27 0 17-10 27-27 27z" />
-      </Svg>
-    </View>
+    <Image
+      accessibilityLabel="Neev mark"
+      resizeMode="contain"
+      source={require("../../assets/neev-icon.png")}
+      style={styles.mark}
+    />
   );
 }
 
 export function Wordmark({ subdued = false, colors }: { subdued?: boolean; colors: Colors }) {
   return (
-    <Image
-      accessibilityLabel="Tend"
-      resizeMode="contain"
-      source={require("../../assets/tend-wordmark.png")}
-      style={[
-        styles.wordmark,
-        {
-          opacity: subdued ? 0.34 : 1,
-          tintColor: colors.dark ? colors.primaryText : undefined,
-        },
-      ]}
-    />
+    <Text accessibilityLabel="neev" style={[styles.wordmark, { color: colors.quietAccent, opacity: subdued ? 0.34 : 1 }]}>neev</Text>
   );
 }
 
@@ -141,7 +130,7 @@ export function TextBlock({ children, colors, style }: PropsWithChildren<{ color
 
 const styles = StyleSheet.create({
   mark: { width: 40, height: 40, borderRadius: 11, overflow: "hidden" },
-  wordmark: { width: 261, height: 75, marginTop: 14 },
+  wordmark: { alignSelf: "center", fontFamily: font.expressiveItalic, fontSize: 52, lineHeight: 62, marginTop: 14 },
   iconAction: { width: 44, height: 44, borderRadius: 22, borderWidth: 2, borderColor: "transparent", alignItems: "center", justifyContent: "center" },
   action: { alignItems: "center", justifyContent: "center", borderRadius: 999, paddingHorizontal: 22 },
   inlineSection: { width: "100%", borderTopWidth: 1, paddingTop: spacing.md, gap: spacing.sm },

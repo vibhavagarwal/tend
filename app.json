@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "Tend",
+    "name": "Neev",
     "slug": "tend",
     "version": "1.0.0",
-    "icon": "./assets/tend-icon.png",
+    "icon": "./assets/neev-icon.png",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "android": {
@@ -14,7 +14,7 @@
       [
         "expo-speech-recognition",
         {
-          "microphonePermission": "Allow Tend to use the microphone for speech recognition.",
+          "microphonePermission": "Allow Neev to use the microphone for speech recognition.",
           "androidSpeechServicePackages": [
             "com.google.android.googlequicksearchbox",
             "com.google.android.tts",
