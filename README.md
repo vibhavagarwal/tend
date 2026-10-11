@@ -1,5 +1,9 @@
 # Neev
 
+<p align="center">
+  <img src="assets/neev-icon.png" width="160" alt="Neev logo">
+</p>
+
 Neev is a calm, local-first Android habit tracker for people who want to record
 what happened without turning reflection into another task. Speak or type a
 plain-language Habit Statement, review Neev's interpretation, and explicitly
