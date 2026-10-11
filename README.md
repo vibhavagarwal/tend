@@ -14,6 +14,16 @@ the initial screen quiet, asks for confirmation before meaningful changes,
 and makes recent activity available by scrolling rather than demanding
 attention.
 
+## Snapshots
+
+<p align="center">
+  <img src="assets/portfolio/neev-track-screen.png" width="280" alt="Neev Track screen with the Neev mark, wordmark, and capture options">
+  <img src="assets/portfolio/neev-reflect-screen.png" width="280" alt="Neev Reflect screen showing weekly and all-time habit counts">
+</p>
+
+The Track screen keeps logging simple; Reflect turns saved activity into a
+quiet, readable summary.
+
 ## Product decisions
 
 - **Confirmation before change.** Statements never silently create Habits or
